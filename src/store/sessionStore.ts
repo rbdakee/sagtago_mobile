@@ -17,7 +17,9 @@ type SessionState = {
 };
 
 export const useSessionStore = create<SessionState>((set) => ({
-  isAuthenticated: false,
+  // На ветке скриншотов EXPO_PUBLIC_SCREENSHOT=1 стартуем уже авторизованными,
+  // чтобы CI открывал сразу Главную, а не онбординг. В обычной сборке флага нет → false.
+  isAuthenticated: process.env.EXPO_PUBLIC_SCREENSHOT === '1',
   phone: undefined,
   hasBootstrapped: false,
   signIn: (phone) => set({ isAuthenticated: true, phone }),
