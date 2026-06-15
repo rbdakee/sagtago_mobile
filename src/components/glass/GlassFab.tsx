@@ -52,7 +52,7 @@ export function GlassFab({
     >
       {variant === 'glass' && (
         <View style={[StyleSheet.absoluteFill, { borderRadius: radius, overflow: 'hidden' }]}>
-          <GlassLayers strong />
+          <GlassLayers strong radius={radius} />
         </View>
       )}
       {icon}

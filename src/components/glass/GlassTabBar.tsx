@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { tokens, useTheme, type Theme } from '@/theme';
 
-import { GlassLayers } from './GlassSurface';
+import { GlassLayers, SUPPORTS_LIQUID_GLASS } from './GlassSurface';
 
 /** Тип пропсов берём из самого `Tabs`, чтобы не тянуть deep-import bottom-tabs. */
 export type GlassTabBarProps = Parameters<
@@ -40,9 +40,9 @@ export function GlassTabBar({ state, navigation }: GlassTabBarProps) {
       pointerEvents="box-none"
       style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 12) }]}
     >
-      <View style={[styles.capsule, theme.shadows.glass]}>
-        <View style={styles.glassLayer}>
-          <GlassLayers />
+      <View style={[styles.capsule, theme.shadows.glass, SUPPORTS_LIQUID_GLASS && styles.capsuleNative]}>
+        <View style={[styles.glassLayer, SUPPORTS_LIQUID_GLASS && styles.glassLayerNative]}>
+          <GlassLayers radius={9999} />
         </View>
         {state.routes.map((route, index) => {
           const meta = TAB_META[route.name];
@@ -110,6 +110,11 @@ const useStyles = (theme: Theme) =>
       // (визуально её полностью закрывает glassLayer сверху)
       backgroundColor: theme.colors.surface,
     },
+    // Нативный Liquid Glass сам полупрозрачный: убираем непрозрачную подложку,
+    // чтобы сквозь плавающую капсулу просвечивал контент, и жёсткую рамку —
+    // материал даёт собственный краевой блик. Только iOS 26+ (там нет Android-тени).
+    capsuleNative: { backgroundColor: 'transparent' },
+    glassLayerNative: { borderWidth: 0 },
     // слой стекла отдельным absoluteFill (overflow:hidden), чтобы тень капсулы не обрезалась
     glassLayer: {
       position: 'absolute',

@@ -1,15 +1,34 @@
 /**
  * Liquid Glass — низкоуровневые слои стекла, общие для navbar/tabbar/sheet/fab.
- * Порт `.glass` / `.glass-spec` из components.css: блюр + полупрозрачная заливка
- * (`theme.glass.overlay`) + верхний 1px-блик (`theme.glass.highlight`).
+ *
+ * Две реализации за одним API:
+ *  • iOS 26+ — настоящий нативный Liquid Glass (`expo-glass-effect` → `GlassView`,
+ *    UIGlassEffect): один слой, материал сам даёт размытие, краевой блик и адаптацию.
+ *  • Android / iOS<26 / web — фолбэк: порт `.glass` из components.css на expo-blur
+ *    (блюр + полупрозрачная заливка `theme.glass.overlay` + верхний 1px-блик).
  *
  * Glass используем ТОЛЬКО в этих компонентах (AGENTS.md §1.8). Везде — токены.
  */
 import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/theme';
+
+/**
+ * Доступен ли нативный Liquid Glass (iOS 26+). На прочих платформах `GlassView`
+ * деградирует до обычного View, поэтому там рисуем expo-blur-фолбэк. Значение
+ * стабильно в рамках запуска — вычисляем один раз. try/catch — на случай, когда
+ * нативный модуль не слинкован (Expo Go без модуля, jest).
+ */
+let supportsLiquidGlass = false;
+try {
+  supportsLiquidGlass = isLiquidGlassAvailable();
+} catch {
+  supportsLiquidGlass = false;
+}
+export const SUPPORTS_LIQUID_GLASS = supportsLiquidGlass;
 
 /**
  * Абсолютно-позиционированные слои стекла (блюр + заливка + блик).
@@ -19,13 +38,34 @@ import { useTheme } from '@/theme';
 export function GlassLayers({
   strong = false,
   highlight = true,
+  radius,
 }: {
   /** Более плотная заливка (overlayStrong) — для модалок/листов. */
   strong?: boolean;
   /** Верхний «liquid» блик. */
   highlight?: boolean;
+  /**
+   * Радиус скругления для нативного стекла, чтобы материал скруглялся по форме
+   * родителя. В фолбэке скругление даёт сам клип-родитель (`overflow:'hidden'`).
+   */
+  radius?: number;
 }) {
   const theme = useTheme();
+
+  // iOS 26+: настоящий нативный Liquid Glass. Один слой — материал сам даёт
+  // размытие, краевой блик и адаптацию к контенту, поэтому ручные overlay/highlight
+  // не нужны. colorScheme берём из темы приложения (у нас свой тумблер тем).
+  if (SUPPORTS_LIQUID_GLASS) {
+    return (
+      <GlassView
+        style={[StyleSheet.absoluteFill, radius != null ? { borderRadius: radius } : null]}
+        glassEffectStyle="regular"
+        colorScheme={theme.isDark ? 'dark' : 'light'}
+      />
+    );
+  }
+
+  // Фолбэк (Android / iOS<26 / web): expo-blur + полупрозрачная заливка + блик.
   return (
     <>
       <BlurView
@@ -99,7 +139,7 @@ export function GlassSurface({
           },
         ]}
       >
-        <GlassLayers strong={strong} highlight={highlight} />
+        <GlassLayers strong={strong} highlight={highlight} radius={r} />
       </View>
       {children}
     </View>
