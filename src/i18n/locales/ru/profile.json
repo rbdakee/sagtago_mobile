@@ -1,1 +1,24 @@
-{}
+{
+  "title": "Профиль",
+  "guestName": "Покупатель",
+  "noPhone": "Телефон не указан",
+  "settingsTitle": "Настройки",
+  "language": "Язык",
+  "languages": {
+    "ru": "Русский",
+    "kk": "Қазақша"
+  },
+  "theme": "Тема",
+  "themeModes": {
+    "system": "Системная",
+    "light": "Светлая",
+    "dark": "Тёмная"
+  },
+  "savedFood": "Спасено еды",
+  "savedFoodSoon": "скоро",
+  "aboutTitle": "О сервисе",
+  "offer": "Публичная оферта",
+  "privacy": "Политика конфиденциальности",
+  "signOut": "Выйти",
+  "version": "Версия {{version}}"
+}

@@ -1,58 +1,26 @@
 /**
  * Таб-бар (4 таба: Главная · Заказы · Избранное · Профиль).
- * ФУНДАМЕНТ создаёт базовую версию; glass-агент (Wave 1) заменяет на GlassTabBar
- * (expo-blur, tint по теме). Лейблы — через i18n (common.tabs.*).
+ * Стеклянный таб-бар — `GlassTabBar` (expo-blur, tint по теме), подключён через
+ * проп `tabBar`. Лейблы внутри GlassTabBar берутся из i18n (common.tabs.*);
+ * `title` здесь оставлен как фолбэк/доступность.
  */
 import { Tabs } from 'expo-router';
-import { Heart, House, ShoppingBag, User } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@/theme';
+import { GlassTabBar } from '@/components/glass/GlassTabBar';
 
 export default function TabsLayout() {
-  const theme = useTheme();
   const { t } = useTranslation('common');
 
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme.colors.brandPrimary,
-        tabBarInactiveTintColor: theme.colors.textFaint,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-        },
-      }}
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <GlassTabBar {...props} />}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: t('tabs.home'),
-          tabBarIcon: ({ color, size }) => <House color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          title: t('tabs.orders'),
-          tabBarIcon: ({ color, size }) => <ShoppingBag color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="favorites"
-        options={{
-          title: t('tabs.favorites'),
-          tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: t('tabs.profile'),
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: t('tabs.home') }} />
+      <Tabs.Screen name="orders" options={{ title: t('tabs.orders') }} />
+      <Tabs.Screen name="favorites" options={{ title: t('tabs.favorites') }} />
+      <Tabs.Screen name="profile" options={{ title: t('tabs.profile') }} />
     </Tabs>
   );
 }

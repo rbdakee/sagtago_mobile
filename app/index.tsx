@@ -1,10 +1,14 @@
 /**
- * C-01 Splash / bootstrap. Сейчас (мок, без auth-флоу) сразу уводит в табы.
- * Auth-агент (Wave 2) заменит на: bootstrap сессии из secure-store →
- * редирект в (tabs) или (auth)/phone. Точка гейта — здесь.
+ * C-01 Гейт сессии. Авторизован → табы, иначе → онбординг/авторизация.
+ * Bootstrap сессии пока мок (sessionStore — in-memory). Реальный bootstrap из
+ * expo-secure-store подключит auth-интеграция по контракту бэкенда (Phase 3),
+ * точка гейта остаётся здесь.
  */
 import { Redirect } from 'expo-router';
 
+import { useSessionStore } from '@/store/sessionStore';
+
 export default function Index() {
-  return <Redirect href="/(tabs)" />;
+  const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
+  return <Redirect href={isAuthenticated ? '/(tabs)' : '/(auth)/onboarding'} />;
 }
