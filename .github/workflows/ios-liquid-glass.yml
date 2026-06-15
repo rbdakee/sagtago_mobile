@@ -43,8 +43,9 @@ jobs:
         id: xc
         run: |
           WS=$(ls -d ios/*.xcworkspace | head -1)
-          SCHEME=$(xcodebuild -workspace "$WS" -list -json \
-            | python3 -c "import sys,json;print(json.load(sys.stdin)['workspace']['schemes'][0])")
+          # Схема приложения у Expo совпадает с именем .xcworkspace (SaqtaGo).
+          # НЕ берём первую из -list: там первой может быть pod-схема (EXApplication).
+          SCHEME=$(basename "$WS" .xcworkspace)
           echo "workspace=$WS" >> "$GITHUB_OUTPUT"
           echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
           echo "Workspace=$WS  Scheme=$SCHEME"
@@ -87,8 +88,9 @@ jobs:
       - name: Install, launch (Главная) & screenshot
         run: |
           U="${{ steps.sim.outputs.udid }}"
-          APP=$(find build/Build/Products/Release-iphonesimulator -maxdepth 1 -name "*.app" | head -1)
+          APP=$(find build/Build/Products/Release-iphonesimulator -maxdepth 1 -name "*.app" -type d | head -1)
           echo "App bundle: $APP"
+          if [ -z "$APP" ]; then echo "No .app found:"; ls -R build/Build/Products | head -60; exit 1; fi
           mkdir -p artifacts
           xcrun simctl install "$U" "$APP"
           # короткое видео всего прохода
