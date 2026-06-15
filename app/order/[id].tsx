@@ -12,17 +12,16 @@ import {
   Clock,
   Flag,
   Info,
-  PackageOpen,
+  MapPin,
+  Navigation,
   Star,
   XCircle,
 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CodeCard } from '@/components/domain/CodeCard';
-import { MerchantHeader } from '@/components/domain/MerchantHeader';
 import { QRCard } from '@/components/domain/QRCard';
 import { EmptyState } from '@/components/states/EmptyState';
 import { ErrorState } from '@/components/states/ErrorState';
@@ -33,7 +32,7 @@ import { Divider } from '@/components/ui/Divider';
 import { GlassNavBar } from '@/components/glass/GlassNavBar';
 import { useOrder } from '@/data';
 import { ORDER_STATUS_VARIANT, type Order } from '@/domain';
-import { formatMoney, formatWindow } from '@/lib';
+import { formatDistance, formatMoney, formatWindow, open2gis } from '@/lib';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 
 type Tone = 'success' | 'danger' | 'warning' | 'info';
@@ -85,16 +84,27 @@ export default function OrderScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.statusLine}>
-          <Badge
-            variant={ORDER_STATUS_VARIANT[order.status]}
-            label={tc(`status.order.${order.status}`)}
-          />
+        {/* Заведение + бокс + статус */}
+        <View style={styles.card}>
+          <View style={styles.headRow}>
+            <View style={styles.headBody}>
+              <Text style={styles.headName} numberOfLines={1}>
+                {order.merchant.name}
+              </Text>
+              <Text style={styles.headBox} numberOfLines={1}>
+                {`${order.box.title} × ${order.qty}`}
+              </Text>
+            </View>
+            <Badge
+              variant={ORDER_STATUS_VARIANT[order.status]}
+              label={tc(`status.order.${order.status}`)}
+              style={styles.headBadge}
+            />
+          </View>
         </View>
 
         {isPaid ? (
           <>
-            <CodeCard code={order.pickupCode} brightenLabel={t('detail.brighten')} />
             <QRCard order={order} />
             <Text style={styles.counterHint}>{t('detail.showAtCounter')}</Text>
           </>
@@ -102,28 +112,41 @@ export default function OrderScreen() {
           <StatusHero status={order.status} t={t} styles={styles} theme={theme} />
         )}
 
-        {/* Заведение + адрес + 2GIS */}
+        {/* Окно выдачи + адрес/2GIS — единый блок */}
         <View style={styles.card}>
-          <MerchantHeader merchant={order.merchant} />
-        </View>
-
-        {/* Окно выдачи */}
-        <View style={styles.inlineCard}>
-          <View style={styles.inlineIcon}>
-            <Clock size={18} color={theme.colors.textMuted} />
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Clock size={18} color={theme.colors.textMuted} />
+            </View>
+            <View style={styles.infoBody}>
+              <Text style={styles.infoTitle}>{t('detail.window')}</Text>
+              <Text style={styles.infoSub}>{t('detail.today')}</Text>
+            </View>
+            <Text style={styles.infoValue}>{formatWindow(order.pickupWindow)}</Text>
           </View>
-          <Text style={styles.inlineLabel}>{t('detail.window')}</Text>
-          <Text style={styles.inlineValue}>{formatWindow(order.pickupWindow)}</Text>
-        </View>
 
-        {/* Что внутри */}
-        <View style={styles.card}>
-          <View style={styles.cardHead}>
-            <PackageOpen size={18} color={theme.colors.brandPrimary} />
-            <Text style={styles.cardTitle}>{t('detail.whatsInside')}</Text>
+          <Divider />
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <MapPin size={18} color={theme.colors.textMuted} />
+            </View>
+            <View style={styles.infoBody}>
+              <Text style={styles.infoTitle} numberOfLines={1}>
+                {order.merchant.address}
+              </Text>
+              <Text style={styles.infoSub}>{formatDistance(order.merchant.distanceM)}</Text>
+            </View>
+            <Pressable
+              onPress={() => open2gis(order.merchant.geo)}
+              style={({ pressed }) => [styles.gisBtn, pressed && styles.gisBtnPressed]}
+              accessibilityRole="button"
+              accessibilityLabel={tc('actions.open2gis')}
+            >
+              <Navigation size={16} color={theme.colors.text} />
+              <Text style={styles.gisText}>{tc('actions.gis')}</Text>
+            </Pressable>
           </View>
-          <Text style={styles.boxTitle}>{order.box.title}</Text>
-          <Text style={styles.boxDesc}>{order.box.description}</Text>
         </View>
 
         {/* Суммы (сбор 3% отдельной строкой) */}
@@ -241,8 +264,14 @@ const makeStyles = (theme: Theme) =>
     content: { paddingHorizontal: theme.screenPad, gap: theme.spacing[4] },
     stateWrap: { flex: 1, paddingHorizontal: theme.screenPad, justifyContent: 'center' },
 
-    statusLine: { alignItems: 'center' },
     counterHint: { ...theme.typography.caption, color: theme.colors.textMuted, textAlign: 'center', marginTop: -theme.spacing[2] },
+
+    // Первый блок: заведение + бокс×кол-во + статус справа.
+    headRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing[3] },
+    headBody: { flex: 1, minWidth: 0, gap: 2 },
+    headName: { ...theme.typography.h2, color: theme.colors.text },
+    headBox: { ...theme.typography.body, color: theme.colors.textMuted },
+    headBadge: { alignSelf: 'center' },
 
     hero: { borderRadius: theme.radii.card, padding: theme.spacing[6], alignItems: 'center', gap: theme.spacing[2] },
     heroIcon: { marginBottom: theme.spacing[1] },
@@ -258,25 +287,35 @@ const makeStyles = (theme: Theme) =>
       gap: theme.spacing[2],
       ...theme.shadows.card,
     },
-    cardHead: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing[2] },
     cardTitle: { ...theme.typography.h2, color: theme.colors.text },
-    boxTitle: { ...theme.typography.bodyL, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
-    boxDesc: { ...theme.typography.body, color: theme.colors.textMuted },
 
-    inlineCard: {
+    // Единый блок «окно выдачи + адрес/2GIS».
+    infoRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing[3], minHeight: 48 },
+    infoIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: theme.radii.sm,
+      backgroundColor: theme.colors.surface2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    infoBody: { flex: 1, minWidth: 0, gap: 2 },
+    infoTitle: { ...theme.typography.body, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
+    infoSub: { ...theme.typography.caption, color: theme.colors.textMuted },
+    infoValue: { ...theme.typography.body, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
+    gisBtn: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.spacing[3],
+      gap: 6,
+      height: 36,
+      paddingHorizontal: theme.spacing[3],
+      borderRadius: theme.radii.btn,
+      borderWidth: 1.5,
+      borderColor: theme.colors.borderStrong,
       backgroundColor: theme.colors.surface,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radii.card,
-      paddingHorizontal: theme.spacing[4],
-      minHeight: 56,
     },
-    inlineIcon: { width: 22, alignItems: 'center' },
-    inlineLabel: { ...theme.typography.body, color: theme.colors.textMuted, flex: 1 },
-    inlineValue: { ...theme.typography.body, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
+    gisBtnPressed: { backgroundColor: theme.colors.surface2 },
+    gisText: { ...theme.typography.caption, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
 
     sumRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     sumLabel: { ...theme.typography.body, color: theme.colors.textMuted },

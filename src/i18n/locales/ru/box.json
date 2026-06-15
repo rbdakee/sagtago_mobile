@@ -2,12 +2,27 @@
   "surprise": {
     "title": "Что примерно внутри"
   },
+  "category": {
+    "label": "Категория",
+    "bakery": "Пекарня",
+    "cafe": "Кафе",
+    "restaurant": "Ресторан",
+    "grocery": "Магазин",
+    "sushi": "Суши",
+    "coffee": "Кофейня",
+    "other": "Другое"
+  },
+  "ratingCount_one": "{{count}} оценка",
+  "ratingCount_few": "{{count}} оценки",
+  "ratingCount_many": "{{count}} оценок",
+  "reviews": {
+    "cta": "Посмотреть отзывы"
+  },
   "benefit": {
-    "youPay": "Вы платите",
-    "value": "Ценность"
+    "priceLabel": "Цена бокса"
   },
   "window": {
-    "title": "Окно выдачи"
+    "title": "Окно самовывоза сегодня"
   },
   "stock": {
     "title": "Осталось",

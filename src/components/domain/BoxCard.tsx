@@ -120,6 +120,16 @@ export function BoxCard({ box, onPress, onToggleFavorite }: BoxCardProps) {
           <Text style={styles.title} numberOfLines={1}>
             {box.title}
           </Text>
+          {!isSold && (
+            <View style={styles.stock}>
+              <Text style={[styles.stockLabel, isClosing && styles.warnText]}>
+                {t('units.inStock')}
+              </Text>
+              <Text style={[styles.stockValue, isClosing && styles.warnText]}>
+                {t('units.pcs', { count: box.stockLeft })}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.meta}>
@@ -129,14 +139,6 @@ export function BoxCard({ box, onPress, onToggleFavorite }: BoxCardProps) {
             <MapPin size={13} color={theme.colors.textFaint} />
             <Text style={styles.metaText}>{formatDistance(box.merchant.distanceM)}</Text>
           </View>
-          {!isSold && (
-            <>
-              <View style={styles.dot} />
-              <Text style={[styles.metaText, isClosing && styles.warnText]}>
-                {t('units.left', { count: box.stockLeft })}
-              </Text>
-            </>
-          )}
         </View>
 
         <View style={styles.priceline}>
@@ -262,12 +264,25 @@ const useStyles = (theme: Theme) =>
       color: theme.colors.text,
     },
     body: { padding: theme.spacing[3] },
-    row1: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    row1: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: theme.spacing[2],
+    },
     title: {
       ...theme.typography.bodyL,
       fontFamily: theme.typography.h2.fontFamily,
       color: theme.colors.text,
       flexShrink: 1,
+    },
+    // Остаток по правому краю: «В наличии» сверху, «N шт.» снизу (без обводки).
+    stock: { alignItems: 'flex-end' },
+    stockLabel: { ...theme.typography.caption, color: theme.colors.textMuted },
+    stockValue: {
+      ...theme.typography.caption,
+      fontFamily: theme.typography.h2.fontFamily,
+      color: theme.colors.text,
     },
     meta: {
       flexDirection: 'row',

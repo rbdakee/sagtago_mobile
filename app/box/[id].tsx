@@ -1,20 +1,30 @@
 /**
- * C-08 Карточка бокса. useBox(id) → фото, заведение (MerchantHeader), блок выгоды
- * (цена крупно, зачёркнутая ценность, скидка), что внутри, окно, остаток, доверие
- * (TrustBlock, R4). Закреплённый низ — CTA «Забронировать» → /booking/[boxId].
+ * C-08 Карточка бокса. useBox(id) → фото (320, с затемнением сверху/снизу) +
+ * «лист», который наезжает на фото со скруглением. Шапка листа: лого+имя+рейтинг
+ * заведения и скидка/статус справа. Дальше — заголовок, описание, блок выгоды
+ * (цена + ценность), список инфо-строк (окно+остаток, адрес+2GIS, что внутри),
+ * доверие (TrustBlock, R4). Закреплённый низ — цена + CTA «Забронировать».
  * Состояния: available / sold_out|closed (CTA выключен) / closing-soon (warning) +
- * Loading / Error / not-found.
+ * Loading / Error / not-found. Хедера нет — «назад»/«избранное» плавающими кнопками.
  */
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { AlertTriangle, Boxes, Clock, Heart, Package } from 'lucide-react-native';
-import type { ComponentType } from 'react';
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Heart,
+  MapPin,
+  Package,
+  Star,
+} from 'lucide-react-native';
+import type { ComponentType, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { GlassNavBar } from '@/components/glass/GlassNavBar';
-import { MerchantHeader } from '@/components/domain/MerchantHeader';
+import { initials } from '@/components/domain/_shared';
 import { TrustBlock } from '@/components/domain/TrustBlock';
 import { EmptyState } from '@/components/states/EmptyState';
 import { ErrorState } from '@/components/states/ErrorState';
@@ -24,7 +34,7 @@ import { Button } from '@/components/ui/Button';
 import { Discount } from '@/components/ui/Discount';
 import { useBox, useToggleFavorite } from '@/data';
 import { BOX_STATUS_VARIANT, type Box } from '@/domain';
-import { formatMoney, formatWindow } from '@/lib';
+import { formatDistance, formatMoney, formatWindow, open2gis, pluralRu } from '@/lib';
 import { useTheme, type Theme } from '@/theme';
 
 type Urgency = 'available' | 'closing' | 'sold';
@@ -50,7 +60,7 @@ export default function BoxDetail() {
   if (isError) {
     return (
       <View style={styles.root}>
-        <GlassNavBar onBack={() => router.back()} />
+        <FloatingNav theme={theme} top={insets.top + theme.spacing[2]} onBack={() => router.back()} />
         <View style={styles.center}>
           <ErrorState onRetry={() => refetch()} />
         </View>
@@ -61,7 +71,7 @@ export default function BoxDetail() {
   if (!box) {
     return (
       <View style={styles.root}>
-        <GlassNavBar onBack={() => router.back()} />
+        <FloatingNav theme={theme} top={insets.top + theme.spacing[2]} onBack={() => router.back()} />
         <View style={styles.center}>
           <EmptyState
             emoji="🔍"
@@ -88,31 +98,29 @@ export default function BoxDetail() {
         : t('cta.book');
 
   const favNode = (
-    <Pressable
-      hitSlop={8}
+    <RoundIconButton
+      theme={theme}
       onPress={() => toggleFav.mutate(box.id)}
-      accessibilityRole="button"
       accessibilityState={{ selected: fav }}
-      style={styles.favBtn}
     >
       <Heart
         size={22}
         color={fav ? theme.colors.brandAccent : theme.colors.text}
         fill={fav ? theme.colors.brandAccent : 'transparent'}
       />
-    </Pressable>
+    </RoundIconButton>
   );
 
   return (
     <View style={styles.root}>
-      <View style={styles.navWrap}>
-        <GlassNavBar onBack={() => router.back()} right={favNode} />
-      </View>
+      <FloatingNav
+        theme={theme}
+        top={insets.top + theme.spacing[2]}
+        onBack={() => router.back()}
+        right={favNode}
+      />
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: theme.spacing[12] }]}
-      >
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.photo}>
           <Image
             source={{ uri: box.photo }}
@@ -120,18 +128,30 @@ export default function BoxDetail() {
             contentFit="cover"
             transition={200}
           />
-          <View style={styles.discount}>
-            <Discount value={box.discountPct} size="lg" />
-          </View>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>{box.title}</Text>
-            {box.status !== 'published' ? (
+        <View style={[styles.sheet, { paddingBottom: theme.spacing[10] }]}>
+          {/* Заведение + скидка/статус */}
+          <View style={styles.headRow}>
+            <View style={styles.merchant}>
+              <View style={styles.ava}>
+                <Text style={styles.avaText}>{initials(box.merchant.name)}</Text>
+              </View>
+              <View style={styles.merchantInfo}>
+                <Text style={styles.merchantName} numberOfLines={1}>
+                  {box.merchant.name}
+                </Text>
+              </View>
+            </View>
+            {box.status === 'published' ? (
+              <Discount value={box.discountPct} size="lg" />
+            ) : (
               <Badge variant={BOX_STATUS_VARIANT[box.status]} label={t(`common:status.box.${box.status}`)} />
-            ) : null}
+            )}
           </View>
+
+          <Text style={styles.title}>{box.title}</Text>
+          <Text style={styles.description}>{box.description}</Text>
 
           {isClosing ? (
             <View style={styles.warn}>
@@ -140,41 +160,79 @@ export default function BoxDetail() {
             </View>
           ) : null}
 
-          <MerchantHeader merchant={box.merchant} />
-
-          <View style={styles.divider} />
-
-          {/* Блок выгоды */}
+          {/* Блок выгоды: цена слева, остаток справа */}
           <View style={styles.benefit}>
             <View style={styles.benefitMain}>
-              <Text style={styles.benefitLabel}>{t('benefit.youPay')}</Text>
+              <Text style={styles.benefitLabel}>{t('benefit.priceLabel')}</Text>
               <View style={styles.priceRow}>
                 <Text style={styles.price}>{formatMoney(box.price)}</Text>
-                <Text style={styles.value}>{formatMoney(box.value)}</Text>
+                <Text style={styles.old}>{formatMoney(box.value)}</Text>
               </View>
             </View>
-            <Discount value={box.discountPct} size="lg" />
+            <View style={styles.benefitValue}>
+              <Text style={styles.benefitLabel}>{t('stock.title')}</Text>
+              <Text style={[styles.benefitValueText, isClosing && { color: theme.colors.warning }]}>
+                {t('stock.count', { count: box.stockLeft })}
+              </Text>
+            </View>
           </View>
 
-          {/* Что внутри */}
-          <InfoRow theme={theme} Icon={Package} label={t('surprise.title')} value={box.category} />
-          {/* Окно выдачи */}
-          <InfoRow
-            theme={theme}
-            Icon={Clock}
-            label={t('window.title')}
-            value={formatWindow(box.pickupWindow)}
-          />
-          {/* Остаток */}
-          <InfoRow
-            theme={theme}
-            Icon={Boxes}
-            label={t('stock.title')}
-            value={t('stock.count', { count: box.stockLeft })}
-            valueWarn={isClosing}
-          />
+          {/* Отзывы заведения: рейтинг слева + переход */}
+          <Pressable
+            onPress={() => {
+              /* TODO: экран отзывов заведения появится позже */
+            }}
+            style={({ pressed }) => [styles.reviews, pressed && styles.reviewsPressed]}
+            accessibilityRole="button"
+            accessibilityLabel={t('reviews.cta')}
+          >
+            <View style={styles.reviewsLeft}>
+              <Star size={16} color={theme.colors.warning} fill={theme.colors.warning} />
+              <Text style={styles.reviewsScore}>{box.merchant.rating.toFixed(1)}</Text>
+              <Text style={styles.reviewsCount}>
+                {t(`ratingCount_${pluralRu(box.merchant.ratingCount)}`, {
+                  count: box.merchant.ratingCount,
+                })}
+              </Text>
+            </View>
+            <View style={styles.reviewsCta}>
+              <Text style={styles.reviewsCtaText}>{t('reviews.cta')}</Text>
+              <ChevronRight size={18} color={theme.colors.brandPrimary} />
+            </View>
+          </Pressable>
 
-          <Text style={styles.description}>{box.description}</Text>
+          {/* Инфо-строки: категория → окно → адрес */}
+          <View style={styles.infoList}>
+            <InfoLine
+              theme={theme}
+              Icon={Package}
+              a={`${t('category.label')}: ${t(`category.${box.merchant.category}`)}`}
+              b={box.category}
+            />
+            <InfoLine
+              theme={theme}
+              Icon={Clock}
+              a={t('window.title')}
+              b={formatWindow(box.pickupWindow)}
+            />
+            <InfoLine
+              theme={theme}
+              Icon={MapPin}
+              a={box.merchant.address}
+              b={formatDistance(box.merchant.distanceM)}
+              last
+              right={
+                <Pressable
+                  onPress={() => open2gis(box.merchant.geo)}
+                  style={({ pressed }) => [styles.gisBtn, pressed && styles.gisBtnPressed]}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common:actions.open2gis')}
+                >
+                  <Text style={styles.gisText}>{t('common:actions.gis')}</Text>
+                </Pressable>
+              }
+            />
+          </View>
 
           <TrustBlock title={t('trust.title')} text={t('trust.text')} />
         </View>
@@ -182,8 +240,8 @@ export default function BoxDetail() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing[3] }]}>
         <View style={styles.footerPrice}>
-          <Text style={styles.footerLabel}>{t('benefit.youPay')}</Text>
           <Text style={styles.footerValue}>{formatMoney(box.price)}</Text>
+          <Text style={styles.footerValueStruck}>{formatMoney(box.value)}</Text>
         </View>
         <Button
           label={ctaLabel}
@@ -196,48 +254,111 @@ export default function BoxDetail() {
   );
 }
 
-function InfoRow({
+/**
+ * Плавающая навигация поверх фото (без шапки): «назад» слева, произвольный слот
+ * справа (избранное). Сами кнопки — круглые с обводкой, как в шапке Главной.
+ */
+function FloatingNav({
   theme,
-  Icon,
-  label,
-  value,
-  valueWarn,
+  top,
+  onBack,
+  right,
 }: {
   theme: Theme;
-  Icon: ComponentType<{ size?: number; color?: string }>;
-  label: string;
-  value: string;
-  valueWarn?: boolean;
+  top: number;
+  onBack: () => void;
+  right?: ReactNode;
+}) {
+  const styles = useStyles(theme);
+  const { t } = useTranslation('common');
+  return (
+    <View style={[styles.floatNav, { top }]} pointerEvents="box-none">
+      <RoundIconButton theme={theme} onPress={onBack} accessibilityLabel={t('actions.back')}>
+        <ChevronLeft size={24} color={theme.colors.text} />
+      </RoundIconButton>
+      {right}
+    </View>
+  );
+}
+
+/** Круглая иконка-кнопка с обводкой и тенью (порт `.iconbtn-round` из шапки Главной). */
+function RoundIconButton({
+  theme,
+  children,
+  onPress,
+  accessibilityLabel,
+  accessibilityState,
+}: {
+  theme: Theme;
+  children: ReactNode;
+  onPress: () => void;
+  accessibilityLabel?: string;
+  accessibilityState?: { selected?: boolean };
 }) {
   const styles = useStyles(theme);
   return (
-    <View style={styles.infoRow}>
-      <View style={styles.infoIcon}>
-        <Icon size={18} color={theme.colors.textMuted} />
+    <Pressable
+      onPress={onPress}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={accessibilityState}
+      style={({ pressed }) => [styles.roundBtn, pressed && styles.roundBtnPressed]}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+/** Инфо-строка листа (порт `.infoline`): иконка + две строки текста + опц. слот справа. */
+function InfoLine({
+  theme,
+  Icon,
+  a,
+  b,
+  bWarn,
+  right,
+  last,
+}: {
+  theme: Theme;
+  Icon: ComponentType<{ size?: number; color?: string }>;
+  a: string;
+  b: string;
+  bWarn?: boolean;
+  right?: ReactNode;
+  last?: boolean;
+}) {
+  const styles = useStyles(theme);
+  return (
+    <View style={[styles.infoLine, last && styles.infoLineLast]}>
+      <View style={styles.infoIc}>
+        <Icon size={22} color={theme.colors.brandPrimary} />
       </View>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={[styles.infoValue, valueWarn && { color: theme.colors.warning }]} numberOfLines={1}>
-        {value}
-      </Text>
+      <View style={styles.infoTx}>
+        <Text style={styles.infoA} numberOfLines={1}>
+          {a}
+        </Text>
+        <Text style={[styles.infoB, bWarn && { color: theme.colors.warning }]} numberOfLines={1}>
+          {b}
+        </Text>
+      </View>
+      {right}
     </View>
   );
 }
 
 function LoadingView({ theme }: { theme: Theme }) {
   const styles = useStyles(theme);
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.root}>
-      <View style={styles.navWrap}>
-        <GlassNavBar onBack={() => router.back()} />
-      </View>
-      <View style={styles.content}>
-        <Skeleton width="100%" height={undefined} radius={0} style={styles.photoSkeleton} />
-        <View style={[styles.section, { gap: theme.spacing[3] }]}>
-          <Skeleton width="70%" height={24} />
-          <Skeleton width="50%" height={16} />
-          <Skeleton width="40%" height={28} style={{ marginTop: theme.spacing[2] }} />
-          <Skeleton width="100%" height={64} radius={theme.radii.card} style={{ marginTop: theme.spacing[3] }} />
-        </View>
+      <FloatingNav theme={theme} top={insets.top + theme.spacing[2]} onBack={() => router.back()} />
+      <Skeleton width="100%" height={320} radius={0} />
+      <View style={[styles.sheet, { gap: theme.spacing[3] }]}>
+        <Skeleton width="60%" height={20} />
+        <Skeleton width="70%" height={28} style={{ marginTop: theme.spacing[2] }} />
+        <Skeleton width="50%" height={16} />
+        <Skeleton width="100%" height={72} radius={theme.radii.card} style={{ marginTop: theme.spacing[3] }} />
       </View>
     </View>
   );
@@ -246,22 +367,61 @@ function LoadingView({ theme }: { theme: Theme }) {
 const useStyles = (theme: Theme) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: theme.colors.bg },
-    navWrap: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 },
+    floatNav: {
+      position: 'absolute',
+      left: theme.screenPad,
+      right: theme.screenPad,
+      zIndex: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
     center: { flex: 1, justifyContent: 'center' },
     scroll: { flex: 1 },
-    content: { backgroundColor: theme.colors.bg },
-    photo: { width: '100%', aspectRatio: 4 / 3, backgroundColor: theme.colors.surface2 },
-    photoSkeleton: { width: '100%', aspectRatio: 4 / 3 },
+
+    photo: { width: '100%', height: 320, backgroundColor: theme.colors.surface2 },
     photoSold: { opacity: 0.55 },
-    discount: { position: 'absolute', left: theme.screenPad, bottom: theme.spacing[3] },
-    section: { paddingHorizontal: theme.screenPad, paddingTop: theme.spacing[4], gap: theme.spacing[3] },
-    titleRow: {
+
+    // Лист, наезжающий на фото со скруглением (порт `.box-sheet`).
+    sheet: {
+      marginTop: -26,
+      backgroundColor: theme.colors.bg,
+      borderTopLeftRadius: theme.radii.sheet,
+      borderTopRightRadius: theme.radii.sheet,
+      paddingHorizontal: theme.screenPad,
+      paddingTop: theme.spacing[5],
+    },
+
+    headRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: theme.spacing[3],
     },
-    title: { ...theme.typography.h1, color: theme.colors.text, flexShrink: 1 },
+    merchant: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 },
+    ava: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: theme.colors.brandPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avaText: {
+      ...theme.typography.bodyL,
+      fontFamily: theme.typography.h1.fontFamily,
+      color: theme.colors.textInverse,
+    },
+    merchantInfo: { flexShrink: 1, gap: 2 },
+    merchantName: {
+      ...theme.typography.bodyL,
+      fontFamily: theme.typography.h2.fontFamily,
+      color: theme.colors.text,
+    },
+
+    title: { ...theme.typography.h1, color: theme.colors.text, marginTop: theme.spacing[4] },
+    description: { ...theme.typography.body, color: theme.colors.textMuted, marginTop: 4 },
+
     warn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -270,41 +430,91 @@ const useStyles = (theme: Theme) =>
       paddingHorizontal: theme.spacing[3],
       borderRadius: theme.radii.sm,
       backgroundColor: theme.colors.warningBg,
+      marginTop: theme.spacing[3],
     },
     warnText: { ...theme.typography.caption, color: theme.colors.warning, flexShrink: 1 },
-    divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.colors.border, marginVertical: theme.spacing[1] },
+
     benefit: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      gap: theme.spacing[3],
       padding: theme.spacing[4],
       borderRadius: theme.radii.card,
       backgroundColor: theme.colors.surface,
       borderWidth: 1,
       borderColor: theme.colors.border,
+      marginTop: theme.spacing[4],
     },
     benefitMain: { gap: theme.spacing[1], flexShrink: 1 },
     benefitLabel: { ...theme.typography.caption, color: theme.colors.textMuted },
     priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: theme.spacing[2] },
     price: { ...theme.typography.display, color: theme.colors.text },
-    value: { ...theme.typography.body, color: theme.colors.textFaint, textDecorationLine: 'line-through' },
-    infoRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing[3] },
-    infoIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: theme.radii.sm,
+    old: { ...theme.typography.body, color: theme.colors.textFaint, textDecorationLine: 'line-through' },
+    benefitValue: { marginLeft: 'auto', alignItems: 'flex-end', gap: theme.spacing[1] },
+    benefitValueText: {
+      ...theme.typography.body,
+      fontFamily: theme.typography.h2.fontFamily,
+      color: theme.colors.text,
+    },
+
+    reviews: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: theme.spacing[3],
+      paddingHorizontal: theme.spacing[4],
+      height: 52,
+      borderRadius: theme.radii.card,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.surface,
+      marginTop: theme.spacing[3],
+    },
+    reviewsPressed: { backgroundColor: theme.colors.surface2 },
+    reviewsLeft: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing[2], flexShrink: 1 },
+    reviewsScore: { ...theme.typography.body, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
+    reviewsCount: { ...theme.typography.caption, color: theme.colors.textMuted },
+    reviewsCta: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+    reviewsCtaText: {
+      ...theme.typography.caption,
+      fontFamily: theme.typography.h2.fontFamily,
+      color: theme.colors.brandPrimary,
+    },
+
+    infoList: { marginTop: theme.spacing[2] },
+    infoLine: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing[3],
+      paddingVertical: theme.spacing[3],
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.border,
+    },
+    infoLineLast: { borderBottomWidth: 0 },
+    infoIc: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
       backgroundColor: theme.colors.surface2,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    infoLabel: { ...theme.typography.body, color: theme.colors.textMuted, flex: 1 },
-    infoValue: {
-      ...theme.typography.body,
-      fontFamily: theme.typography.h2.fontFamily,
-      color: theme.colors.text,
-      flexShrink: 1,
+    infoTx: { flex: 1, minWidth: 0 },
+    infoA: { ...theme.typography.body, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
+    infoB: { ...theme.typography.caption, color: theme.colors.textMuted, marginTop: 1 },
+    gisBtn: {
+      height: 36,
+      paddingHorizontal: theme.spacing[3],
+      borderRadius: theme.radii.btn,
+      borderWidth: 1.5,
+      borderColor: theme.colors.borderStrong,
+      backgroundColor: theme.colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    description: { ...theme.typography.body, color: theme.colors.textMuted },
+    gisBtnPressed: { backgroundColor: theme.colors.surface2 },
+    gisText: { ...theme.typography.caption, fontFamily: theme.typography.h2.fontFamily, color: theme.colors.text },
+
     footer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -316,8 +526,23 @@ const useStyles = (theme: Theme) =>
       backgroundColor: theme.colors.surface,
     },
     footerPrice: { gap: 2 },
-    footerLabel: { ...theme.typography.caption, color: theme.colors.textMuted },
-    footerValue: { ...theme.typography.h2, color: theme.colors.text },
-    favBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+    footerValue: { ...theme.typography.h1, color: theme.colors.text },
+    footerValueStruck: {
+      ...theme.typography.body,
+      color: theme.colors.textFaint,
+      textDecorationLine: 'line-through',
+    },
+    roundBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      ...theme.shadows.card,
+    },
+    roundBtnPressed: { backgroundColor: theme.colors.surface2 },
     cta: { flex: 1 },
   });

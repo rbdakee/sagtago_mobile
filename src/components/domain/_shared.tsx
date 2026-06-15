@@ -24,10 +24,13 @@ export function initials(name: string): string {
 export function RatingInline({
   rating,
   count,
+  countText,
   color,
 }: {
   rating: number;
   count?: number;
+  /** Готовый текст количества (напр. «312 оценок»). Заменяет «(count)». */
+  countText?: string;
   /** Цвет числа (по умолчанию text). На фото можно передать inverse. */
   color?: string;
 }) {
@@ -42,7 +45,7 @@ export function RatingInline({
         ]}
       >
         {rating.toFixed(1)}
-        {count != null ? ` (${count})` : ''}
+        {countText != null ? ` · ${countText}` : count != null ? ` (${count})` : ''}
       </Text>
     </View>
   );

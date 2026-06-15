@@ -21,7 +21,8 @@
     "later": "Позже",
     "send": "Отправить",
     "close": "Закрыть",
-    "open2gis": "Открыть в 2GIS"
+    "open2gis": "Открыть в 2GIS",
+    "gis": "2GIS"
   },
   "status": {
     "order": {
@@ -40,6 +41,8 @@
   },
   "units": {
     "left": "осталось {{count}}",
+    "inStock": "В наличии",
+    "pcs": "{{count}} шт.",
     "distanceM": "{{value}} м",
     "distanceKm": "{{value}} км"
   }

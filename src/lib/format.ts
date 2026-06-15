@@ -41,6 +41,21 @@ export function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1).replace('.', ',')}${NBSP}км`;
 }
 
+/**
+ * Категория русского плюрала (CLDR) для целого `count`: `one | few | many`.
+ * Hermes в RN не гарантирует `Intl.PluralRules`, поэтому выбираем форму сами —
+ * ключи i18n храним как `key_one|key_few|key_many` и собираем суффикс этим хелпером:
+ * `t(`key_${pluralRu(n)}`, { count: n })`.
+ */
+export function pluralRu(count: number): 'one' | 'few' | 'many' {
+  const n = Math.abs(Math.trunc(count));
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'one';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'few';
+  return 'many';
+}
+
 /** ISO → `15 июн`. */
 export function formatDate(iso: string): string {
   const d = new Date(iso);
