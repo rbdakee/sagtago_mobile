@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaqtaGo — Дизайн-система</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 48px 32px 96px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; margin-bottom: 48px; }
+  .wordmark { font-family: var(--font-display); font-weight: 700; font-size: 34px; letter-spacing: -0.02em; color: var(--brand-primary); display: flex; align-items: center; gap: 12px; }
+  .wordmark .dot { width: 14px; height: 14px; border-radius: 4px; background: var(--brand-accent); }
+  .kicker { font-family: var(--font-ui); font-weight: 600; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+
+  .theme-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .theme-chip { display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: var(--r-pill); border: 1.5px solid var(--border); background: var(--surface); font-size: 13px; font-weight: 600; color: var(--text-muted); transition: all .15s; }
+  .theme-chip[aria-pressed="true"] { border-color: var(--brand-primary); color: var(--text); box-shadow: var(--shadow-card); }
+  .theme-chip .sw { width: 22px; height: 22px; border-radius: 7px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
+  .theme-chip .sw i { display: block; }
+
+  section { margin-top: 56px; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .sec-head h2 { margin: 0; }
+  .sec-head span { font-size: 13px; color: var(--text-faint); }
+
+  .grid { display: grid; gap: 16px; }
+  .swatches { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .swatch { border-radius: var(--r-card); overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
+  .swatch .chip { height: 84px; }
+  .swatch .meta { padding: 12px 14px; }
+  .swatch .name { font-weight: 600; font-size: 14px; }
+  .swatch .val { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .swatch .tok { font-size: 11px; color: var(--text-faint); margin-top: 4px; font-family: var(--font-ui); }
+
+  .scale-row { display: grid; grid-template-columns: repeat(13, 1fr); gap: 6px; }
+  .scale-row .cell { height: 56px; border-radius: 10px; border: 1px solid var(--border); position: relative; }
+  .scale-row .cell span { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 10px; color: var(--text-faint); }
+
+  .type-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 0; border-bottom: 1px dashed var(--border); }
+  .type-row .label { width: 150px; flex: none; font-size: 12px; color: var(--text-muted); }
+  .type-row .spec { width: 130px; flex: none; font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+  .tokens-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 20px 22px; }
+  .tokens-card .row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .tokens-card .row:last-child { border-bottom: none; }
+  .tokens-card .row code { color: var(--text-muted); font-family: var(--font-ui); }
+  .tokens-card .row b { font-weight: 600; }
+
+  .spacing-row { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .spacing-row .s { text-align: center; }
+  .spacing-row .s .bar { background: var(--accent-soft); border: 1px solid var(--brand-primary); border-radius: 4px; }
+  .spacing-row .s .lab { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  .radii-row { display: flex; gap: 20px; flex-wrap: wrap; }
+  .radii-row .r { text-align: center; }
+  .radii-row .r .box { width: 76px; height: 76px; background: var(--surface-2); border: 1.5px solid var(--brand-primary); }
+  .radii-row .r .lab { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+  .shadow-row { display: flex; gap: 24px; flex-wrap: wrap; }
+  .shadow-row .sh { width: 150px; height: 90px; border-radius: var(--r-card); background: var(--surface); display: flex; align-items: flex-end; padding: 10px; font-size: 11px; color: var(--text-muted); }
+
+  /* Glass demo over photo */
+  .glass-demo { position: relative; height: 320px; border-radius: var(--r-card); overflow: hidden; background-size: cover; background-position: center;
+    background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=70'); }
+  .glass-demo .panel { position: absolute; left: 20px; right: 20px; bottom: 20px; border-radius: var(--r-card); padding: 16px 18px; }
+  .glass-demo .floatbtn { position: absolute; top: 18px; right: 18px; height: 44px; padding: 0 18px; border-radius: var(--r-pill); display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--text); }
+  .glass-demo .pill { position: absolute; top: 18px; left: 18px; height: 36px; padding: 0 14px; border-radius: var(--r-pill); display: flex; align-items: center; font-weight: 600; font-size: 13px; color: var(--text); }
+  .note { font-size: 13px; color: var(--text-muted); max-width: 720px; line-height: 1.55; }
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 760px){ .twocol{ grid-template-columns: 1fr; } .scale-row{ grid-template-columns: repeat(7,1fr);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="kicker">Спасение еды · Казахстан</div>
+      <div class="wordmark">
+        <span class="app-mark" style="--icon-size:54px"><span class="brand-mark"></span></span>
+        SaqtaGo
+      </div>
+      <div class="note" style="margin-top:8px">Дизайн-система · направление «Fresh Market» · React Native / Expo. Вордмарк — временный плейсхолдер.</div>
+    </div>
+    <div>
+      <div class="kicker" style="margin-bottom:8px">Тема (5 палитр)</div>
+      <div class="theme-row" id="themeRow"></div>
+    </div>
+  </div>
+
+  <!-- BRAND -->
+  <section>
+    <div class="sec-head"><h2 class="t-h1">Бренд-ядро</h2><span>3 цвета определяют бренд. Остальное выводится из них.</span></div>
+    <div class="grid swatches" id="brandSw"></div>
+  </section>
+
+  <!-- SEMANTIC -->
+  <section>
+    <div class="sec-head"><h2 class="t-h1">Семантика</h2><span>Едина во всех темах — узнаваемость статусов</span></div>
+    <div class="grid swatches" id="semSw"></div>
+  </section>
+
+  <!-- SURFACES / TEXT -->
+  <section>
+    <div class="twocol">
+      <div>
+        <div class="sec-head"><h2 class="t-h2">Поверхности и фон</h2></div>
+        <div class="grid swatches" id="surfSw"></div>
+      </div>
+      <div>
+        <div class="sec-head"><h2 class="t-h2">Текст и границы</h2></div>
+        <div class="grid swatches" id="textSw"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEUTRAL -->
+  <section>
+    <div class="sec-head"><h2 class="t-h1">Нейтральная шкала</h2><span>neutral 0 → 950</span></div>
+    <div class="scale-row" id="neutralScale"></div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <div class="sec-head"><h2 class="t-h1">Типографика</h2><span>Unbounded (дисплей) · Onest (UI) — полная кириллица</span></div>
+    <div class="type-row"><div class="label">Display</div><div class="spec">Unbounded 600 · 32/38</div><div class="t-display">Спасли 70%</div></div>
+    <div class="type-row"><div class="label">H1</div><div class="spec">Unbounded 500 · 24/30</div><div class="t-h1">Боксы рядом с вами</div></div>
+    <div class="type-row"><div class="label">H2</div><div class="spec">Onest 600 · 20/26</div><div class="t-h2">Сегодня в продаже</div></div>
+    <div class="type-row"><div class="label">Body L</div><div class="spec">Onest 500 · 17/24</div><div class="t-bodyL">1 030 ₸ за бокс</div></div>
+    <div class="type-row"><div class="label">Body</div><div class="spec">Onest 400 · 15/22</div><div class="t-body">Окно выдачи 20:00–21:30, осталось 3 бокса</div></div>
+    <div class="type-row"><div class="label">Caption</div><div class="spec">Onest 400 · 13/18</div><div class="t-caption">Пекарня «Тары-нан» · 1,2 км</div></div>
+    <div class="type-row" style="border-bottom:none"><div class="label">Code</div><div class="spec">Onest 600 · tabular</div><div class="t-code">4827</div></div>
+  </section>
+
+  <!-- LIQUID GLASS -->
+  <section>
+    <div class="sec-head"><h2 class="t-h1">Liquid Glass</h2><span>Только навбар · таб-бар · листы · плавающие кнопки · модалки</span></div>
+    <p class="note">Стекло применяется исключительно на навигационных и плавающих поверхностях — там, где контент должен «просвечивать» под слоем. Контентные карточки еды остаются плотными и читаемыми. Каждый стеклянный слой: <b>blur + saturate</b>, полупрозрачная заливка, верхний specular-блик и мягкая тень.</p>
+    <div class="glass-demo" style="margin-top:16px">
+      <div class="pill glass glass-spec">📍 Алматы</div>
+      <div class="floatbtn glass glass-spec">Список / Карта</div>
+      <div class="panel glass glass-spec">
+        <div class="t-bodyL" style="margin-bottom:2px">Стеклянный нижний лист</div>
+        <div class="t-caption t-muted">backdrop-filter: blur(22px) saturate(180%) · inset highlight · soft shadow</div>
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:16px" id="glassTokens"></div>
+  </section>
+
+  <!-- SPACING / RADII / SHADOW -->
+  <section>
+    <div class="twocol">
+      <div>
+        <div class="sec-head"><h2 class="t-h2">Отступы · база 8pt</h2></div>
+        <div class="spacing-row" id="spacingRow"></div>
+      </div>
+      <div>
+        <div class="sec-head"><h2 class="t-h2">Скругления</h2></div>
+        <div class="radii-row">
+          <div class="r"><div class="box" style="border-radius:var(--r-input)"></div><div class="lab">input · 12</div></div>
+          <div class="r"><div class="box" style="border-radius:var(--r-btn)"></div><div class="lab">btn · 12</div></div>
+          <div class="r"><div class="box" style="border-radius:var(--r-card)"></div><div class="lab">card · 16</div></div>
+          <div class="r"><div class="box" style="border-radius:var(--r-sheet)"></div><div class="lab">sheet · 24</div></div>
+          <div class="r"><div class="box" style="border-radius:var(--r-pill)"></div><div class="lab">pill · 999</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2 class="t-h2">Тени — мягкие, низкие</h2></div>
+    <div class="shadow-row">
+      <div class="sh" style="box-shadow:var(--shadow-card)">card</div>
+      <div class="sh" style="box-shadow:var(--shadow-raise)">raise</div>
+      <div class="sh" style="box-shadow:var(--shadow-btn)">btn</div>
+      <div class="sh glass glass-spec">glass</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const THEMES = [
+  { id:'fresh',    name:'Fresh Market', a:'#14532D', b:'#B9F227' },
+  { id:'apple',    name:'Apple Green',  a:'#0F5132', b:'#8CEB34' },
+  { id:'forest',   name:'Forest Premium', a:'#163020', b:'#D4FF6A' },
+  { id:'berry',    name:'Berry Harvest', a:'#4A1F59', b:'#FF6B5E' },
+  { id:'midnight', name:'Midnight Saver', a:'#15211C', b:'#00E0A4' },
+];
+const themeRow = document.getElementById('themeRow');
+let active = 'fresh';
+THEMES.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'theme-chip'; b.setAttribute('aria-pressed', t.id===active);
+  b.innerHTML = `<span class="sw"><i style="background:${t.a}"></i><i style="background:${t.b}"></i><i style="background:${t.a}"></i><i style="background:${t.b}"></i></span>${t.name}`;
+  b.onclick = () => { active=t.id; document.documentElement.setAttribute('data-theme',t.id);
+    [...themeRow.children].forEach((c,i)=>c.setAttribute('aria-pressed', THEMES[i].id===active)); };
+  themeRow.appendChild(b);
+});
+
+function sw(items, mount){
+  const el = document.getElementById(mount);
+  el.innerHTML = items.map(i=>`
+    <div class="swatch">
+      <div class="chip" style="background:${i.css}; ${i.brd?'border-bottom:1px solid var(--border)':''}"></div>
+      <div class="meta"><div class="name">${i.name}</div><div class="val">${i.val||''}</div><div class="tok">${i.tok}</div></div>
+    </div>`).join('');
+}
+sw([
+  {name:'Primary', css:'var(--brand-primary)', tok:'--brand-primary'},
+  {name:'Primary pressed', css:'var(--brand-primary-press)', tok:'--brand-primary-press'},
+  {name:'Accent', css:'var(--brand-accent)', tok:'--brand-accent'},
+  {name:'Accent ink', css:'var(--brand-accent-ink)', tok:'--brand-accent-ink'},
+  {name:'Secondary', css:'var(--brand-secondary)', tok:'--brand-secondary'},
+], 'brandSw');
+sw([
+  {name:'Success', css:'var(--success)', val:'#1F9D55', tok:'--success'},
+  {name:'Warning', css:'var(--warning)', val:'#E0A100', tok:'--warning'},
+  {name:'Danger', css:'var(--danger)', val:'#D23B3B', tok:'--danger'},
+  {name:'Info', css:'var(--info)', val:'#2D6BB5', tok:'--info'},
+], 'semSw');
+sw([
+  {name:'Background', css:'var(--bg)', brd:1, tok:'--bg'},
+  {name:'Surface', css:'var(--surface)', brd:1, tok:'--surface'},
+  {name:'Surface 2', css:'var(--surface-2)', brd:1, tok:'--surface-2'},
+  {name:'Surface 3', css:'var(--surface-3)', brd:1, tok:'--surface-3'},
+], 'surfSw');
+sw([
+  {name:'Text', css:'var(--text)', tok:'--text'},
+  {name:'Text muted', css:'var(--text-muted)', tok:'--text-muted'},
+  {name:'Text faint', css:'var(--text-faint)', tok:'--text-faint'},
+  {name:'Border', css:'var(--border)', brd:1, tok:'--border'},
+], 'textSw');
+
+const ns = document.getElementById('neutralScale');
+['0','50','100','200','300','400','500','600','700','800','900','950'].forEach(n=>{
+  const c = document.createElement('div'); c.className='cell';
+  c.style.background = `var(--neutral-${n})`;
+  c.innerHTML = `<span>${n}</span>`;
+  ns.appendChild(c);
+});
+
+document.getElementById('glassTokens').innerHTML = [
+  ['--glass-blur','22px'],['--glass-saturate','180%'],['--glass-tint','rgba(255,255,255,.66)'],
+  ['--glass-border','rgba(255,255,255,.55)'],['--glass-highlight','rgba(255,255,255,.85)'],['--glass-shadow','rgba(16,35,26,.14)'],
+].map(([k,v])=>`<div class="tokens-card"><div class="row"><b>${k}</b><code>${v}</code></div></div>`).join('');
+
+const sp = document.getElementById('spacingRow');
+[['1','4'],['2','8'],['3','12'],['4','16'],['5','20'],['6','24'],['8','32'],['10','40'],['12','48']].forEach(([t,px])=>{
+  const d=document.createElement('div'); d.className='s';
+  d.innerHTML=`<div class="bar" style="width:${px}px;height:${px}px"></div><div class="lab">${px}</div>`;
+  sp.appendChild(d);
+});
+</script>
+</body>
+</html>

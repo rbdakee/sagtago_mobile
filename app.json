@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "SaqtaGo",
+    "slug": "saqtago",
+    "scheme": "saqtago",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "kz.saqtago.app"
+    },
+    "android": {
+      "package": "kz.saqtago.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#28262C",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      "expo-font",
+      "expo-localization",
+      "expo-secure-store"
+    ]
+  }
+}

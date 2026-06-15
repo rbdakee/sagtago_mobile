@@ -1,0 +1,388 @@
+/* ============================================================
+   SaqtaGo — Design Tokens
+   Единый источник правды. Все компоненты ссылаются ТОЛЬКО на токены.
+   Тема меняется атрибутом [data-theme] на корне — все значения
+   пересчитываются автоматически.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Onest:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap');
+
+/* ----------------------------------------------------------------
+   1. НЕЙТРАЛЬНАЯ ШКАЛА (прохладная, лёгкий зелёный подтон) — общая
+   ---------------------------------------------------------------- */
+:root {
+  --neutral-0:   #FFFFFF;
+  --neutral-50:  #F7F9F7;
+  --neutral-100: #F1F4F0;
+  --neutral-200: #E2E8E2;
+  --neutral-300: #CDD6CD;
+  --neutral-400: #A7B2A8;
+  --neutral-500: #7E8A80;
+  --neutral-600: #5B6B61;
+  --neutral-700: #41514A;
+  --neutral-800: #2A352F;
+  --neutral-900: #18211C;
+  --neutral-950: #0E1714;
+
+  /* --- Семантика (одинаковая во ВСЕХ темах — узнаваемость статусов) --- */
+  --success: #1F9D55;
+  --warning: #E0A100;
+  --danger:  #D23B3B;
+  --info:    #2D6BB5;
+  --success-bg: #E7F5EC;
+  --warning-bg: #FBF1D8;
+  --danger-bg:  #FAE7E7;
+  --info-bg:    #E5EEF8;
+
+  /* --- Spacing (база 8pt) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --screen-pad: 16px;
+
+  /* --- Радиусы --- */
+  --r-card:  16px;
+  --r-btn:   999px;
+  --r-input: 12px;
+  --r-sheet: 24px;
+  --r-pill:  999px;
+  --r-sm:    8px;
+
+  /* --- Тени (мягкие, низкие) --- */
+  --shadow-card:  0 2px 8px rgba(16, 35, 26, 0.06);
+  --shadow-raise: 0 8px 24px rgba(16, 35, 26, 0.10);
+  --shadow-glass: 0 8px 32px rgba(16, 35, 26, 0.12);
+  --shadow-btn:   0 4px 14px rgba(16, 35, 26, 0.12);
+
+  /* --- Типографика --- */
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-ui: 'Onest', system-ui, -apple-system, sans-serif;
+
+  /* --- Liquid Glass (общие управляющие значения) --- */
+  --glass-rgb: 255, 255, 255; /* база стекла — тема может переопределить (тёмная) */
+  --glass-blur: 22px;
+  --glass-saturate: 180%;
+  --glass-tint:      rgba(255, 255, 255, 0.66);
+  --glass-tint-strong: rgba(255, 255, 255, 0.78);
+  --glass-border:    rgba(255, 255, 255, 0.55);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow:    rgba(16, 35, 26, 0.14);
+
+  /* iOS safe-area-ish */
+  --tabbar-h: 84px;
+  --navbar-h: 52px;
+}
+
+/* ----------------------------------------------------------------
+   2. ТЕМА — Graphite (по умолчанию)
+   основной #28262C · акцент #349357
+   ---------------------------------------------------------------- */
+:root,
+[data-theme="graphite"] {
+  --brand-primary:   #28262C;
+  --brand-primary-press: #1A181E;
+  --brand-accent:    #349357;
+  --brand-accent-press: #2C8049;
+  --brand-accent-ink:#FFFFFF;
+  --brand-secondary: #4A4751;
+
+  --bg:           #F9F8F9;
+  --surface:      #FFFFFF;
+  --surface-2:    #F0EFF1;
+  --surface-3:    #E7E5E9;
+
+  --text:         #1C1A20;
+  --text-muted:   #615E68;
+  --text-faint:   #94909B;
+  --text-inverse: #FFFFFF;
+
+  --border:        #E4E2E7;
+  --border-strong: #D2CFD6;
+
+  --accent-soft:   rgba(52, 147, 87, 0.14);
+  --primary-soft:  rgba(40, 38, 44, 0.08);
+}
+
+/* ----------------------------------------------------------------
+   2-dark. ТЕМА — Graphite Dark
+   графит как тёмный холст · зелёный #349357 как акцент/бренд
+   ---------------------------------------------------------------- */
+[data-theme="graphite-dark"] {
+  --brand-primary:   #349357;
+  --brand-primary-press: #2C8049;
+  --brand-accent:    #3DA767;
+  --brand-accent-press: #339457;
+  --brand-accent-ink:#08130C;
+  --brand-secondary: #2E6A4E;
+
+  --bg:           #0F0E12;
+  --surface:      #1A181E;
+  --surface-2:    #242128;
+  --surface-3:    #2E2B33;
+
+  --text:         #F2F1F4;
+  --text-muted:   #A6A2AD;
+  --text-faint:   #6E6A76;
+  --text-inverse: #FFFFFF;
+
+  --border:        #2C2A31;
+  --border-strong: #3A3742;
+
+  --accent-soft:   rgba(61, 167, 103, 0.18);
+  --primary-soft:  rgba(61, 167, 103, 0.16);
+
+  /* стекло уходит в тёмный графит */
+  --glass-rgb:       26, 24, 30;
+  --glass-border:    rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.10);
+  --glass-shadow:    rgba(0, 0, 0, 0.6);
+
+  /* тени глубже, чтобы читались на тёмном */
+  --shadow-card:  0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-raise: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-glass: 0 10px 36px rgba(0, 0, 0, 0.60);
+  --shadow-btn:   0 6px 18px rgba(0, 0, 0, 0.50);
+}
+
+/* ----------------------------------------------------------------
+   2a. ТЕМА — Deep Pine
+   основной #14353D · акцент #157929
+   ---------------------------------------------------------------- */
+[data-theme="pine"] {
+  --brand-primary:   #14353D;
+  --brand-primary-press: #0E2429;
+  --brand-accent:    #157929;
+  --brand-accent-press: #126B24;
+  --brand-accent-ink:#FFFFFF;
+  --brand-secondary: #2E6A6E;
+
+  --bg:           #F7FAF9;
+  --surface:      #FFFFFF;
+  --surface-2:    #ECF1F0;
+  --surface-3:    #E2EAE9;
+
+  --text:         #0F1F22;
+  --text-muted:   #566066;
+  --text-faint:   #8A9498;
+  --text-inverse: #FFFFFF;
+
+  --border:        #DCE3E2;
+  --border-strong: #C6D0CF;
+
+  --accent-soft:   rgba(21, 121, 41, 0.14);
+  --primary-soft:  rgba(20, 53, 61, 0.08);
+}
+
+/* ----------------------------------------------------------------
+   2b. ТЕМА — Fresh Market (прежняя)
+   ---------------------------------------------------------------- */
+[data-theme="fresh"] {
+  --brand-primary:   #14532D;
+  --brand-primary-press: #0E3D22;
+  --brand-accent:    #B9F227;
+  --brand-accent-press: #A6DC1C;
+  --brand-accent-ink:#102A12;
+  --brand-secondary: #2E7D4F;
+
+  --bg:           #FBFCFA;
+  --surface:      #FFFFFF;
+  --surface-2:    #F1F4F0;
+  --surface-3:    #E8EEE7;
+
+  --text:         #10231A;
+  --text-muted:   #5B6B61;
+  --text-faint:   #8A968D;
+  --text-inverse: #FFFFFF;
+
+  --border:        #E2E8E2;
+  --border-strong: #CDD6CD;
+
+  --accent-soft:   rgba(185, 242, 39, 0.16);
+  --primary-soft:  rgba(20, 83, 45, 0.08);
+}
+
+/* ----------------------------------------------------------------
+   3. ТЕМА B — Apple Green
+   ---------------------------------------------------------------- */
+[data-theme="apple"] {
+  --brand-primary:   #0F5132;
+  --brand-primary-press: #0A3D25;
+  --brand-accent:    #8CEB34;
+  --brand-accent-press: #7AD826;
+  --brand-accent-ink:#0E2410;
+  --brand-secondary: #2BAA66;
+
+  --bg:        #F8FAF8;
+  --surface:   #FFFFFF;
+  --surface-2: #EEF3EE;
+  --surface-3: #E5EDE6;
+
+  --text:       #101412;
+  --text-muted: #66706B;
+  --text-faint: #97A099;
+  --text-inverse:#FFFFFF;
+
+  --border:        #E3E9E4;
+  --border-strong: #CFD9D1;
+
+  --accent-soft:  rgba(140, 235, 52, 0.16);
+  --primary-soft: rgba(15, 81, 50, 0.08);
+}
+
+/* ----------------------------------------------------------------
+   4. ТЕМА C — Forest Premium
+   ---------------------------------------------------------------- */
+[data-theme="forest"] {
+  --brand-primary:   #163020;
+  --brand-primary-press: #0F2417;
+  --brand-accent:    #D4FF6A;
+  --brand-accent-press: #C4F252;
+  --brand-accent-ink:#0E1A0B;
+  --brand-secondary: #2D5A3D;
+
+  --bg:        #F9FBF8;
+  --surface:   #FFFFFF;
+  --surface-2: #EFF4ED;
+  --surface-3: #E6EFE3;
+
+  --text:       #0F1712;
+  --text-muted: #637066;
+  --text-faint: #94A096;
+  --text-inverse:#FFFFFF;
+
+  --border:        #E4EBE2;
+  --border-strong: #D0DACD;
+
+  --accent-soft:  rgba(212, 255, 106, 0.18);
+  --primary-soft: rgba(22, 48, 32, 0.08);
+}
+
+/* ----------------------------------------------------------------
+   5. ТЕМА D — Berry Harvest
+   ---------------------------------------------------------------- */
+[data-theme="berry"] {
+  --brand-primary:   #4A1F59;
+  --brand-primary-press: #371544;
+  --brand-accent:    #FF6B5E;
+  --brand-accent-press: #F0584B;
+  --brand-accent-ink:#2A0E18;
+  --brand-secondary: #7B3FA0;
+
+  --bg:        #FAF9FB;
+  --surface:   #FFFFFF;
+  --surface-2: #F2EEF4;
+  --surface-3: #EAE3EE;
+
+  --text:       #201526;
+  --text-muted: #6D6073;
+  --text-faint: #9B90A0;
+  --text-inverse:#FFFFFF;
+
+  --border:        #E9E5EC;
+  --border-strong: #D8D0DC;
+
+  --accent-soft:  rgba(255, 107, 94, 0.14);
+  --primary-soft: rgba(74, 31, 89, 0.08);
+}
+
+/* ----------------------------------------------------------------
+   6. ТЕМА E — Midnight Saver
+   ---------------------------------------------------------------- */
+[data-theme="midnight"] {
+  --brand-primary:   #15211C;
+  --brand-primary-press: #0E1814;
+  --brand-accent:    #00E0A4;
+  --brand-accent-press: #00CC95;
+  --brand-accent-ink:#062019;
+  --brand-secondary: #284239;
+
+  --bg:        #F7F8F8;
+  --surface:   #FFFFFF;
+  --surface-2: #EEF2F0;
+  --surface-3: #E4EAE7;
+
+  --text:       #0E1714;
+  --text-muted: #5D6763;
+  --text-faint: #909A95;
+  --text-inverse:#FFFFFF;
+
+  --border:        #E4E8E6;
+  --border-strong: #CFD7D3;
+
+  --accent-soft:  rgba(0, 224, 164, 0.14);
+  --primary-soft: rgba(21, 33, 28, 0.08);
+}
+
+/* ============================================================
+   BASE / RESET
+   ============================================================ */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { display: block; max-width: 100%; }
+::selection { background: var(--accent-soft); }
+
+/* ============================================================
+   ТИПОГРАФИКА — утилитарные классы
+   ============================================================ */
+.t-display { font-family: var(--font-display); font-weight: 600; font-size: 32px; line-height: 38px; letter-spacing: -0.02em; }
+.t-h1      { font-family: var(--font-display); font-weight: 500; font-size: 24px; line-height: 30px; letter-spacing: -0.01em; }
+.t-h2      { font-family: var(--font-ui); font-weight: 600; font-size: 20px; line-height: 26px; letter-spacing: -0.01em; }
+.t-bodyL   { font-family: var(--font-ui); font-weight: 500; font-size: 17px; line-height: 24px; }
+.t-body    { font-family: var(--font-ui); font-weight: 400; font-size: 15px; line-height: 22px; }
+.t-caption { font-family: var(--font-ui); font-weight: 400; font-size: 13px; line-height: 18px; }
+.t-code    { font-family: var(--font-ui); font-weight: 600; font-size: 28px; line-height: 32px; font-variant-numeric: tabular-nums; letter-spacing: 0.14em; }
+.t-muted   { color: var(--text-muted); }
+
+/* ============================================================
+   LIQUID GLASS — единственный «стеклянный» примитив
+   Используется ТОЛЬКО на: navbar, tabbar, bottom sheet,
+   floating button, modal, filter panel.
+   ============================================================ */
+.glass {
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass), inset 0 1px 0 var(--glass-highlight);
+  position: relative;
+}
+.glass-strong { background: var(--glass-tint-strong); }
+/* верхний специальный блик — «liquid» highlight */
+.glass-spec::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 40%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+/* ============================================================
+   ТЁМНАЯ ТЕМА — точечные правки захардкоженных светлых мест
+   (повышенная специфичность за счёт [data-theme])
+   ============================================================ */
+[data-theme="graphite-dark"] .splash { background: var(--surface); }
+[data-theme="graphite-dark"] .home-head[data-blur="on"] { background: rgba(26, 24, 30, 0.5); }
+[data-theme="graphite-dark"] .glass-spec::before {
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0));
+}
+[data-theme="graphite-dark"] .chips-row .chip.active {
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+/* подложка под устройством и сам экран — тёмные, без светлого ореола */
+[data-theme="graphite-dark"] .map { background: var(--surface-2); }

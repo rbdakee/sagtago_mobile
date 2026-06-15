@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaqtaGo — Эксперименты с цветом</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="prototype.css">
+<style>
+  /* ============================================================
+     Color Explorer — лэйаут галереи (не трогает компоненты приложения)
+     ============================================================ */
+  html, body { background: #ECEFEC; }
+  body {
+    font-family: var(--font-ui);
+    color: #16201B;
+    padding: 0 0 80px;
+  }
+
+  /* ---- Шапка страницы ---- */
+  .cx-top {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(236,239,236,0.86);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+            backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid rgba(16,35,26,0.08);
+    padding: 22px 32px 18px;
+  }
+  .cx-top h1 {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 26px; letter-spacing: -0.02em; margin: 0;
+    color: #16201B;
+  }
+  .cx-top p { margin: 6px 0 0; font-size: 14px; color: #5B6B61; max-width: 760px; line-height: 1.5; }
+  .cx-top .hint { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; font-size: 13px; font-weight: 600; color: #2E7D4F; background: rgba(46,125,79,0.10); padding: 7px 13px; border-radius: 999px; }
+  .cx-top .hint svg { display: block; }
+
+  /* ---- Секция-палитра ---- */
+  .cx-section {
+    padding: 34px 32px 10px;
+    border-bottom: 1px solid rgba(16,35,26,0.07);
+  }
+  .cx-shead { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 26px; }
+  .cx-name {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: 20px; letter-spacing: -0.01em; color: #16201B;
+    min-width: 168px;
+  }
+  .cx-name small { display: block; font-family: var(--font-ui); font-weight: 500; font-size: 12px; color: #8A968D; letter-spacing: 0; margin-top: 2px; }
+
+  /* контролы выбора цвета */
+  .cx-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cx-ci {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid rgba(16,35,26,0.10);
+    padding: 7px 14px 7px 7px; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(16,35,26,0.05); cursor: pointer;
+  }
+  .cx-ci input[type="color"] {
+    width: 34px; height: 34px; padding: 0; border: none; border-radius: 50%;
+    background: none; cursor: pointer; -webkit-appearance: none; appearance: none;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+  }
+  .cx-ci input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .cx-ci input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+  .cx-ci input[type="color"]::-moz-color-swatch { border: none; border-radius: 50%; }
+  .cx-ci .cx-ci-tx { display: flex; flex-direction: column; line-height: 1.25; }
+  .cx-ci .cx-ci-tx b { font-size: 11px; font-weight: 600; color: #8A968D; text-transform: uppercase; letter-spacing: 0.04em; }
+  .cx-ci .cx-ci-tx code { font-family: 'Manrope', monospace; font-size: 13px; font-weight: 700; color: #16201B; letter-spacing: 0.01em; }
+  .cx-hex {
+    width: 78px; font-family: 'Manrope', monospace; font-size: 13px; font-weight: 700;
+    color: #16201B; letter-spacing: 0.02em; text-transform: uppercase;
+    border: 1px solid rgba(16,35,26,0.14); border-radius: 7px;
+    padding: 4px 8px; background: #F7F9F6; outline: none;
+  }
+  .cx-hex:focus { border-color: var(--brand-accent, #2E7D4F); background: #fff; box-shadow: 0 0 0 3px rgba(46,125,79,0.12); }
+  .cx-hex.invalid { border-color: #D5453B; background: #FDECEA; color: #B12318; }
+  .cx-reset { margin-left: auto; align-self: center; border: 1px solid rgba(16,35,26,0.12); background: #fff; height: 32px; padding: 0 14px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #5B6B61; }
+  .cx-reset:active { background: #F1F4F0; }
+
+  /* derived palette strip */
+  .cx-derived { display: flex; gap: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(16,35,26,0.06); align-self: center; }
+  .cx-derived span { width: 26px; height: 30px; }
+
+  /* ---- Ряд из 4 телефонов ---- */
+  .cx-row {
+    display: grid;
+    grid-template-columns: repeat(4, max-content);
+    gap: 30px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  .cx-row::-webkit-scrollbar { height: 8px; }
+  .cx-row::-webkit-scrollbar-thumb { background: rgba(16,35,26,0.16); border-radius: 4px; }
+
+  .cx-cell { display: flex; flex-direction: column; align-items: center; gap: 11px; }
+  .cx-label { font-size: 12px; font-weight: 600; color: #5B6B61; letter-spacing: 0.01em; }
+
+  /* масштаб телефона */
+  .cx-scale { --s: 0.585; width: calc(390px * var(--s)); height: calc(720px * var(--s)); position: relative; }
+  .cx-phone {
+    width: 390px; height: 720px;
+    transform: scale(var(--s)); transform-origin: top left;
+    position: absolute; top: 0; left: 0;
+    border-radius: 46px; overflow: hidden;
+    background: var(--bg);
+    box-shadow: 0 18px 40px rgba(16,35,26,0.18), 0 0 0 1px rgba(16,35,26,0.06), inset 0 0 0 8px #0b0d0c;
+  }
+  .cx-vp { position: absolute; inset: 8px; border-radius: 38px; overflow: hidden; background: var(--bg); }
+
+  /* статус-бар + чёлка (упрощённые) */
+  .cx-status { position: absolute; top: 0; left: 0; right: 0; height: 47px; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 14px 26px 0; color: var(--text); font-weight: 600; font-size: 14px; pointer-events: none; }
+  .cx-status.light { color: #fff; }
+  .cx-status .time { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .cx-status .icons { display: flex; align-items: center; gap: 6px; }
+  .cx-status .icons svg { display: block; }
+  .cx-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 28px; background: #0b0d0c; border-radius: 0 0 18px 18px; z-index: 45; }
+
+  /* логотип-экран */
+  .cx-logoscreen { position: absolute; inset: 0; background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+  .cx-logoscreen .cx-word { font-family: var(--font-display); font-weight: 600; font-size: 34px; letter-spacing: -0.02em; color: var(--text); }
+  .cx-logoscreen .cx-sub { font-size: 14px; color: var(--text-muted); margin-top: -8px; }
+  .cx-logoscreen .cx-pal { display: flex; gap: 0; border-radius: 10px; overflow: hidden; margin-top: 8px; box-shadow: 0 4px 14px rgba(16,35,26,0.10); }
+  .cx-logoscreen .cx-pal span { width: 44px; height: 40px; }
+
+  /* home — внутри телефона ведём себя как экран */
+  .cx-home { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+  .cx-home .home-head { position: absolute; }
+  .cx-home .boxcard { margin-bottom: 14px; }
+
+  .cx-foot { padding: 30px 32px 0; font-size: 13px; color: #8A968D; }
+</style>
+</head>
+<body>
+
+<div class="cx-top">
+  <h1>SaqtaGo — эксперименты с цветом</h1>
+  <p>Семь направлений палитры на четырёх ключевых экранах. Вся палитра — нейтрали, тени, оттенки, цвет текста на кнопке — выводится автоматически из <b>основного</b> и <b>акцентного</b> цвета.</p>
+  <div class="hint">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+    Меняйте кружки цвета — все 4 экрана обновятся вживую
+  </div>
+</div>
+
+<div id="cxRoot"></div>
+
+<div class="cx-foot">Логотип-глиф и все компоненты — настоящие, из дизайн-системы приложения. Понравится направление — скажите, и я соберу из него полный прототип / тему.</div>
+
+<script>
+/* ============================================================
+   Палитры (основной + акцент). Остальное выводится автоматически.
+   ============================================================ */
+const PALETTES = [
+  { name: 'Текущий',     sub: 'Fresh Market',   primary: '#14532D', accent: '#B9F227' },
+  { name: 'Терракота',   sub: 'тёплый, аппетитный', primary: '#A23E1C', accent: '#F6B53C' },
+  { name: 'Океан',       sub: 'свежий, чистый',  primary: '#0F4C5C', accent: '#46D6C3' },
+  { name: 'Слива',       sub: 'премиальный',     primary: '#4A1F4E', accent: '#FF8C5A' },
+  { name: 'Индиго',      sub: 'спокойный, цифровой', primary: '#22307D', accent: '#FFD23F' },
+  { name: 'Гранат',      sub: 'насыщенный, тёплый', primary: '#6E1B2B', accent: '#F4A93B' },
+  { name: 'Уголь · Лайм', sub: 'дерзкий, тёмный',  primary: '#1E2522', accent: '#BFF13A' },
+];
+
+/* ---------- цветовая математика ---------- */
+const hx = n => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+const toRgb = h => { h = h.replace('#',''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
+const toHex = r => '#' + hx(r[0]) + hx(r[1]) + hx(r[2]);
+const mix = (a, b, t) => { const A = toRgb(a), B = toRgb(b); return toHex([A[0]+(B[0]-A[0])*t, A[1]+(B[1]-A[1])*t, A[2]+(B[2]-A[2])*t]); };
+const tint = (a, t) => mix(a, '#ffffff', t);
+const shade = (a, t) => mix(a, '#000000', t);
+const rgba = (a, al) => { const A = toRgb(a); return `rgba(${A[0]},${A[1]},${A[2]},${al})`; };
+const lum = a => { const A = toRgb(a).map(v => { v/=255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }); return 0.2126*A[0] + 0.7152*A[1] + 0.0722*A[2]; };
+
+function derive(primary, accent) {
+  const ink = mix('#0E1412', primary, 0.14);
+  return {
+    '--brand-primary': primary,
+    '--brand-primary-press': shade(primary, 0.18),
+    '--brand-secondary': mix(primary, '#ffffff', 0.22),
+    '--brand-accent': accent,
+    '--brand-accent-press': shade(accent, 0.10),
+    '--brand-accent-ink': lum(accent) > 0.45 ? shade(accent, 0.80) : '#ffffff',
+    '--bg': tint(primary, 0.955),
+    '--surface': '#ffffff',
+    '--surface-2': tint(primary, 0.93),
+    '--surface-3': tint(primary, 0.89),
+    '--text': ink,
+    '--text-muted': mix(ink, '#ffffff', 0.55),
+    '--text-faint': mix(ink, '#ffffff', 0.72),
+    '--text-inverse': '#ffffff',
+    '--border': tint(primary, 0.85),
+    '--border-strong': tint(primary, 0.76),
+    '--accent-soft': rgba(accent, 0.16),
+    '--primary-soft': rgba(primary, 0.08),
+  };
+}
+
+/* ---------- разметка статус-бара ---------- */
+const STATUS = light => `
+  <div class="cx-status ${light ? 'light' : ''}">
+    <span class="time">9:41</span>
+    <span class="icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.2c2.5 0 4.8 1 6.5 2.6l-1.4 1.5A7.5 7.5 0 0 0 8.5 4.2 7.5 7.5 0 0 0 3.4 6.3L2 4.8A9.4 9.4 0 0 1 8.5 2.2Zm0 3.6c1.5 0 2.9.6 3.9 1.6L8.5 11 4.6 7.4A5.5 5.5 0 0 1 8.5 5.8Z"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="currentColor"/><rect x="23" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.5"/></svg>
+    </span>
+  </div>
+  <div class="cx-notch"></div>`;
+
+/* ---------- 4 экрана ---------- */
+const SCREENS = {
+  logo: () => STATUS(false) + `
+    <div class="cx-logoscreen">
+      <span class="app-mark" style="--icon-size:106px"><span class="brand-mark"></span></span>
+      <div class="cx-word">SaqtaGo</div>
+      <div class="cx-sub">Спасаем еду · Казахстан</div>
+      <div class="cx-pal">
+        <span style="background:var(--brand-primary)"></span>
+        <span style="background:var(--brand-accent)"></span>
+        <span style="background:var(--surface-2)"></span>
+        <span style="background:var(--text)"></span>
+      </div>
+    </div>`,
+
+  splash: () => STATUS(true) + `
+    <section class="splash" style="position:absolute;inset:0">
+      <div class="wm"><span class="app-mark app-mark--invert" style="--icon-size:104px"><span class="brand-mark"></span></span>SaqtaGo</div>
+      <div class="tag">Спасаем еду · Казахстан</div>
+    </section>`,
+
+  onb: () => STATUS(true) + `
+    <section class="onb" style="position:absolute;inset:0">
+      <div class="hero">
+        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=75" alt="">
+        <div class="veil"></div>
+      </div>
+      <div class="body">
+        <div class="dots"><i class="on"></i><i></i></div>
+        <h1 class="t-h1" style="margin:0 0 8px">Любимые кафе со скидкой до 70%</h1>
+        <p class="t-body muted" style="margin:0 0 18px">Заведения отдают свежие излишки в конце дня. Вы забираете вкусно и дёшево.</p>
+        <button class="btn btn-primary btn-full">Начать</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:4px">Пропустить</button>
+      </div>
+    </section>`,
+
+  home: () => STATUS(false) + `
+    <section class="cx-home">
+      <header class="home-head" style="left:0;right:0;top:0">
+        <div class="hh-row">
+          <div class="hh-title"><div class="city">Алматы <span class="city-arrow">▾</span></div></div>
+          <div class="hh-actions">
+            <button class="iconbtn-round"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button>
+            <button class="iconbtn-round"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></button>
+          </div>
+        </div>
+      </header>
+      <div class="chips-row" style="padding-top:96px">
+        <button class="chip active">Все</button>
+        <button class="chip">Пекарни</button>
+        <button class="chip">Кофейни</button>
+        <button class="chip">Продукты</button>
+      </div>
+      <div style="padding:2px 16px 0">
+        ${boxCard({ img:'photo-1509440159596-0249088772ff', disc:'−70%', tag:'осталось 3', logo:'ТН', name:'Пекарня «Тары-нан»', title:'Пекарский сюрприз', dist:'1,2 км', rating:'4,8', price:'990 ₸', old:'3 300 ₸', win:'20:00–21:30' })}
+        ${boxCard({ img:'photo-1517248135467-4c7edcad34c4', disc:'−65%', warn:true, logo:'Д', name:'Кофейня «Дала»', title:'Кофе + выпечка', dist:'650 м', rating:'4,9', price:'1 500 ₸', old:'4 200 ₸', win:'18:00–19:00' })}
+      </div>
+    </section>`,
+};
+
+function boxCard(b) {
+  const badge = b.warn
+    ? '<span class="badge badge-warning glass glass-spec" style="background:var(--glass-tint-strong)"><span class="d"></span>Скоро закроется</span>'
+    : '<span class="badge glass glass-spec" style="background:var(--glass-tint-strong)">' + (b.tag || '') + '</span>';
+  return '<div class="boxcard">' +
+    '<div class="photo">' +
+      '<img src="https://images.unsplash.com/' + b.img + '?auto=format&fit=crop&w=700&q=72" alt="">' +
+      '<div class="grad"></div>' +
+      '<div class="disc"><span class="discount">' + b.disc + '</span></div>' +
+      '<div class="stock">' + badge + '</div>' +
+      '<div class="merchant"><span class="ava">' + b.logo + '</span><span class="nm">' + b.name + '</span></div>' +
+    '</div>' +
+    '<div class="body">' +
+      '<div class="row1"><span class="ttl">' + b.title + '</span></div>' +
+      '<div class="meta"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + b.dist + '</span><span class="dot"></span><span class="rating">★ ' + b.rating + '</span></div>' +
+      '<div class="priceline"><span class="price">' + b.price + '</span><span class="old">' + b.old + '</span><span class="window">🕒 ' + b.win + '</span></div>' +
+    '</div></div>';
+}
+
+const LABELS = [['logo','Логотип'], ['splash','Splash'], ['onb','Онбординг'], ['home','Главный']];
+const DERIVED_KEYS = ['--brand-primary','--brand-primary-press','--brand-accent','--brand-accent-ink','--bg','--surface-2','--border-strong','--text'];
+
+/* ---------- сборка ---------- */
+const root = document.getElementById('cxRoot');
+
+PALETTES.forEach((p, i) => {
+  const sec = document.createElement('div');
+  sec.className = 'cx-section';
+  sec.dataset.default = JSON.stringify({ primary: p.primary, accent: p.accent });
+
+  sec.innerHTML = `
+    <div class="cx-shead">
+      <div class="cx-name">${p.name}<small>${p.sub}</small></div>
+      <div class="cx-controls">
+        <div class="cx-ci"><input type="color" data-role="primary" value="${p.primary}"><span class="cx-ci-tx"><b>Основной</b><input class="cx-hex" data-hex="primary" value="${p.primary.toUpperCase()}" spellcheck="false" maxlength="7"></span></div>
+        <div class="cx-ci"><input type="color" data-role="accent" value="${p.accent}"><span class="cx-ci-tx"><b>Акцент</b><input class="cx-hex" data-hex="accent" value="${p.accent.toUpperCase()}" spellcheck="false" maxlength="7"></span></div>
+      </div>
+      <div class="cx-derived"></div>
+      <button class="cx-reset">Сброс</button>
+    </div>
+    <div class="cx-row">
+      ${LABELS.map(([key, lab]) => `
+        <div class="cx-cell">
+          <div class="cx-scale"><div class="cx-phone" data-screen="${key}"><div class="cx-vp"></div></div></div>
+          <div class="cx-label">${lab}</div>
+        </div>`).join('')}
+    </div>`;
+
+  root.appendChild(sec);
+
+  // наполнить экраны
+  sec.querySelectorAll('.cx-phone').forEach(ph => {
+    ph.querySelector('.cx-vp').innerHTML = SCREENS[ph.dataset.screen]();
+  });
+
+  applyPalette(sec, p.primary, p.accent);
+
+  // слушатели: кружок цвета
+  sec.querySelectorAll('input[type="color"]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const prim = sec.querySelector('input[data-role="primary"]').value;
+      const acc  = sec.querySelector('input[data-role="accent"]').value;
+      applyPalette(sec, prim, acc);
+    });
+  });
+
+  // слушатели: ручной ввод hex
+  sec.querySelectorAll('.cx-hex').forEach(hexInp => {
+    const role = hexInp.dataset.hex;
+    const picker = sec.querySelector('input[data-role="' + role + '"]');
+    const commit = () => {
+      const norm = normHex(hexInp.value);
+      if (!norm) { hexInp.classList.add('invalid'); return; }
+      hexInp.classList.remove('invalid');
+      picker.value = norm;
+      const prim = sec.querySelector('input[data-role="primary"]').value;
+      const acc  = sec.querySelector('input[data-role="accent"]').value;
+      applyPalette(sec, prim, acc);
+    };
+    hexInp.addEventListener('input', () => { if (normHex(hexInp.value)) commit(); });
+    hexInp.addEventListener('change', commit);
+    hexInp.addEventListener('keydown', e => { if (e.key === 'Enter') { commit(); hexInp.blur(); } });
+    hexInp.addEventListener('focus', () => hexInp.select());
+  });
+  sec.querySelector('.cx-reset').addEventListener('click', () => {
+    const d = JSON.parse(sec.dataset.default);
+    sec.querySelector('input[data-role="primary"]').value = d.primary;
+    sec.querySelector('input[data-role="accent"]').value = d.accent;
+    sec.querySelectorAll('.cx-hex').forEach(h => h.classList.remove('invalid'));
+    applyPalette(sec, d.primary, d.accent);
+  });
+});
+
+function normHex(v) {
+  if (!v) return null;
+  let s = v.trim().replace(/^#/, '');
+  if (/^[0-9a-fA-F]{3}$/.test(s)) s = s.split('').map(c => c + c).join('');
+  if (/^[0-9a-fA-F]{6}$/.test(s)) return '#' + s.toLowerCase();
+  return null;
+}
+
+function applyPalette(sec, primary, accent) {
+  const vars = derive(primary, accent);
+  sec.querySelectorAll('.cx-phone').forEach(ph => {
+    for (const k in vars) ph.style.setProperty(k, vars[k]);
+  });
+  // синхронизировать поля hex (если фокус не на них)
+  const ph = sec.querySelector('.cx-hex[data-hex="primary"]');
+  const ah = sec.querySelector('.cx-hex[data-hex="accent"]');
+  if (document.activeElement !== ph) ph.value = primary.toUpperCase();
+  if (document.activeElement !== ah) ah.value = accent.toUpperCase();
+  // derived strip
+  const strip = sec.querySelector('.cx-derived');
+  strip.innerHTML = DERIVED_KEYS.map(k => `<span style="background:${vars[k]}" title="${k}: ${vars[k]}"></span>`).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaqtaGo — Дизайн приложения спасения еды</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { min-height: 100vh; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 64px 32px 96px; }
+  .hero-wm { font-family: var(--font-display); font-weight: 700; font-size: 56px; letter-spacing: -0.03em; color: var(--brand-primary); display: flex; align-items: center; gap: 16px; }
+  .hero-wm .dot { width: 20px; height: 20px; border-radius: 7px; background: var(--brand-accent); }
+  .kicker { font-family: var(--font-ui); font-weight: 600; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+  .lede { font-size: 18px; color: var(--text-muted); line-height: 1.55; max-width: 640px; margin: 18px 0 0; text-wrap: pretty; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .meta-row .badge { height: 30px; padding: 0 14px; font-size: 13px; }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-top: 48px; }
+  @media (max-width: 760px){ .cards { grid-template-columns: 1fr; } }
+  .card { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-card); text-decoration: none; color: inherit; transition: transform .15s, box-shadow .15s; }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-raise); }
+  .card .vis { height: 150px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .card .vis.v1 { background: var(--brand-primary); }
+  .card .vis.v2 { background: var(--surface-2); }
+  .card .vis.v3 { background-size: cover; background-position: center; background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=70'); }
+  .card .body { padding: 18px; }
+  .card .body h3 { margin: 0 0 6px; font-size: 18px; }
+  .card .body p { margin: 0; font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+  .card .go { margin-top: 14px; font-weight: 600; font-size: 14px; color: var(--brand-primary); }
+
+  .swatch-mini { display: flex; gap: 8px; }
+  .swatch-mini i { width: 30px; height: 30px; border-radius: 9px; }
+  .glass-tile { width: 120px; height: 80px; border-radius: 16px; }
+  .device-mini { width: 78px; height: 150px; background: #0b0d0c; border-radius: 16px; padding: 5px; box-shadow: var(--shadow-raise); }
+  .device-mini .scr { width: 100%; height: 100%; border-radius: 12px; background-size: cover; background-position: center; background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=70'); }
+
+  .notes { margin-top: 52px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 24px 26px; }
+  .notes h2 { margin: 0 0 14px; font-size: 18px; }
+  .notes ul { margin: 0; padding-left: 20px; color: var(--text-muted); line-height: 1.7; font-size: 14px; }
+  .notes ul b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Спасение еды · Казахстан · React Native / Expo</div>
+      <div class="hero-wm" style="margin-top:10px">
+        <span class="app-mark" style="--icon-size:80px"><span class="brand-mark"></span></span>
+        SaqtaGo
+      </div>
+  <p class="lede">Дизайн мобильного приложения спасения еды: глубокий вечнозелёный с сочным лаймовым акцентом, типографика Unbounded + Onest, и iOS Liquid Glass на навигации, листах и плавающих поверхностях. Всё построено на дизайн-токенах — тема меняется одним переключателем. Вордмарк временный.</p>
+  <div class="meta-row">
+    <span class="badge badge-success"><span class="d"></span>Fresh Market по умолчанию</span>
+    <span class="badge badge-info"><span class="d"></span>5 переключаемых палитр</span>
+    <span class="badge badge-muted"><span class="d"></span>iPhone 14 · 390×844</span>
+    <span class="badge badge-muted"><span class="d"></span>RU / KK</span>
+  </div>
+
+  <div class="cards">
+    <a class="card" href="Design System.html">
+      <div class="vis v1"><div class="swatch-mini"><i style="background:#14532D"></i><i style="background:#B9F227"></i><i style="background:#2E7D4F"></i></div></div>
+      <div class="body">
+        <h3>Дизайн-система</h3>
+        <p>Токены: бренд, семантика, нейтральная шкала, поверхности, типошкала, отступы, радиусы, тени и Liquid Glass. Живой переключатель 5 тем.</p>
+        <div class="go">Открыть →</div>
+      </div>
+    </a>
+    <a class="card" href="UI Kit.html">
+      <div class="vis v2"><div class="glass-tile glass glass-spec"></div></div>
+      <div class="body">
+        <h3>UI Kit</h3>
+        <p>Переиспользуемые компоненты: кнопки, поля, OTP, чипы, бейджи статусов, карточка бокса, маркеры карты, код/QR, состояния Loading / Empty / Error.</p>
+        <div class="go">Открыть →</div>
+      </div>
+    </a>
+    <a class="card" href="Prototype.html">
+      <div class="vis v3"><div class="device-mini"><div class="scr"></div></div></div>
+      <div class="body">
+        <h3>Прототип клиента</h3>
+        <p>Кликабельный флоу покупки: онбординг → телефон → OTP → главная → карточка → бронь (сбор 3%) → оплата → код выдачи. Заказы, оценка, жалоба, профиль.</p>
+        <div class="go">Открыть →</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="notes">
+    <h2>Заметки для реализации (Expo + React Native)</h2>
+    <ul>
+      <li><b>Токены — единственный источник истины.</b> Ни одного хардкод-HEX в компонентах: всё через CSS-переменные (в RN — объект темы). Смена темы = смена значений токенов.</li>
+      <li><b>Liquid Glass</b> только на: GlassNavigationBar, GlassTabBar, GlassBottomSheet, плавающих кнопках и модалках (в RN — <b>expo-blur</b> + полупрозрачная заливка + верхний блик). Контентные карточки еды — плотные и читаемые.</li>
+      <li><b>Компоненты:</b> BoxCard, OrderCard, MerchantCard, PrimaryButton/SecondaryButton, Input, OTPInput, StatusBadge, RatingStars, QRCodeCard, GlassTabBar/NavBar/BottomSheet — без одноразовых элементов.</li>
+      <li><b>Анимации реалистичны для RN:</b> spring / fade / scale (Reanimated). Без 3D-трансформов и тяжёлых шейдеров.</li>
+      <li><b>Состояния</b> Loading / Empty / Error заложены для Главной, Заказов и Карточки (см. карту экранов «▦ Экраны» в прототипе).</li>
+      <li><b>Дальше:</b> приложение заведения (M-01…M-14) и супер-админ (S-01…S-09) — по тем же токенам и компонентам.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

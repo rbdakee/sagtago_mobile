@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="graphite">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaqtaGo — Прототип клиента</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="prototype.css">
+</head>
+<body>
+
+<!-- Помощник прототипа: карта экранов (вне телефона) -->
+<div class="proto-aid">
+  <button class="ab" id="aidMap">▦ Экраны</button>
+  <button class="ab" id="aidRestart">↺ С начала</button>
+</div>
+<div class="mapsheet" id="mapsheet">
+  <div class="inner">
+    <div class="h-row"><div class="t-h2">Карта экранов клиента</div><button class="ab" data-mapclose>Закрыть</button></div>
+    <div class="t-caption muted" style="margin-top:4px">Кликабельный флоу + варианты состояний. Tap внутри телефона ведёт по сценарию.</div>
+    <div class="grp">Онбординг и вход</div>
+    <div class="links" id="mapGroup1"></div>
+    <div class="grp">Покупка (ядро)</div>
+    <div class="links" id="mapGroup2"></div>
+    <div class="grp">Заказы и обратная связь</div>
+    <div class="links" id="mapGroup3"></div>
+    <div class="grp">Состояния (Loading / Empty / Error)</div>
+    <div class="links" id="mapGroup4"></div>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="device" id="device">
+    <div class="viewport">
+      <div class="notch"></div>
+      <div class="statusbar" id="statusbar">
+        <span class="time">9:41</span>
+        <span class="icons">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.2c2.5 0 4.8 1 6.5 2.6l-1.4 1.5A7.5 7.5 0 0 0 8.5 4.2 7.5 7.5 0 0 0 3.4 6.3L2 4.8A9.4 9.4 0 0 1 8.5 2.2Zm0 3.6c1.5 0 2.9.6 3.9 1.6L8.5 11 4.6 7.4A5.5 5.5 0 0 1 8.5 5.8Z"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="currentColor"/><rect x="23" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.5"/></svg>
+        </span>
+      </div>
+
+      <div class="screens" id="screens">
+
+        <!-- C-01 SPLASH -->
+        <section class="screen splash" data-screen="splash" data-statusbar="light">
+          <div class="wm">
+            <span class="app-mark app-mark--invert" style="--icon-size:112px"><span class="brand-mark"></span></span>
+            SaqtaGo
+          </div>
+          <div class="tag">Спасаем еду · Казахстан</div>
+        </section>
+
+        <!-- C-02 ONBOARDING -->
+        <section class="screen onb" data-screen="onboarding" data-statusbar="light">
+          <div class="hero">
+            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=75" alt="">
+            <div class="veil"></div>
+          </div>
+          <div class="body">
+            <div class="dots"><i class="on"></i><i></i></div>
+            <h1 class="t-h1" style="margin:0 0 8px">Любимые кафе со скидкой до 70%</h1>
+            <p class="t-body muted" style="margin:0 0 22px">Заведения отдают свежие излишки в конце дня. Вы — забираете вкусно и дёшево, еда — не идёт на свалку.</p>
+            <button class="btn btn-primary btn-full" data-go="phone">Начать</button>
+            <button class="btn btn-ghost btn-full" style="margin-top:6px" data-go="home">Пропустить</button>
+          </div>
+        </section>
+
+        <!-- C-03 PHONE -->
+        <section class="screen auth" data-screen="phone">
+          <button class="back-chip" data-back><span class="ar">‹</span>Назад</button>
+          <h1 class="t-h1" style="margin:0 0 6px">Вход по номеру</h1>
+          <p class="t-body muted" style="margin:0 0 28px">Пришлём код подтверждения в WhatsApp.</p>
+          <div class="field">
+            <label>Номер телефона</label>
+            <div class="input-prefix"><span class="pfx">+7</span><input class="input" inputmode="numeric" value="700 123 45 67"></div>
+          </div>
+          <p class="t-caption muted" style="margin:16px 0 0">Нажимая «Получить код», вы соглашаетесь с <span style="color:var(--brand-primary);font-weight:600">офертой</span> и <span style="color:var(--brand-primary);font-weight:600">политикой</span>.</p>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary btn-full" data-go="otp">Получить код</button>
+        </section>
+
+        <!-- C-04 OTP -->
+        <section class="screen auth" data-screen="otp">
+          <button class="back-chip" data-back><span class="ar">‹</span>Назад</button>
+          <h1 class="t-h1" style="margin:0 0 6px">Введите код</h1>
+          <p class="t-body muted" style="margin:0 0 28px">Код отправлен в WhatsApp на <b style="color:var(--text)">+7 700 123 45 67</b></p>
+          <div class="otp" id="otpCells">
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          </div>
+          <div class="h-row" style="margin-top:20px">
+            <span class="t-caption muted" id="resendTimer">Отправить снова через 0:42</span>
+            <span class="t-caption" style="color:var(--brand-primary);font-weight:600">Отправить по SMS</span>
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary btn-full" data-go="permissions">Подтвердить</button>
+        </section>
+
+        <!-- C-05 PERMISSIONS -->
+        <section class="screen auth" data-screen="permissions">
+          <div style="height:8px"></div>
+          <h1 class="t-h1" style="margin:0 0 24px">Чтобы было удобнее</h1>
+          <div class="listcard" style="margin-bottom:14px">
+            <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div style="flex:1"><div style="font-weight:600">Геолокация</div><div class="t-caption muted">Покажем боксы рядом с вами</div></div></div>
+          </div>
+          <div class="listcard">
+            <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div style="flex:1"><div style="font-weight:600">Уведомления</div><div class="t-caption muted">«Бокс рядом» и напоминания забрать заказ</div></div></div>
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary btn-full" data-go="home">Разрешить</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:6px" data-go="home">Позже</button>
+        </section>
+
+        <!-- C-06 HOME (list) -->
+        <section class="screen" data-screen="home" data-tab="home">
+          <header class="home-head" data-search="off" data-collapsed="false">
+            <div class="hh-row">
+              <div class="hh-title">
+                <div class="city">
+                  Алматы <span class="city-arrow">▾</span>
+                </div>
+              </div>
+              <div class="hh-actions">
+                <button class="iconbtn-round" data-search-open aria-label="Поиск">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                </button>
+                <button class="iconbtn-round" data-go="map" aria-label="Карта">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
+                </button>
+                <button class="iconbtn-round" data-open="filtersOverlay" aria-label="Фильтры">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="hh-search">
+              <div class="search-input">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                <span class="caret"></span>
+                <span class="ph">Поиск заведений и боксов</span>
+              </div>
+              <button class="search-cancel" data-search-close>Отмена</button>
+            </div>
+          </header>
+          <div class="chips-row">
+            <button class="chip active">Все</button>
+            <button class="chip">Пекарни</button>
+            <button class="chip">Кофейни</button>
+            <button class="chip">Продукты</button>
+            <button class="chip">Рестораны</button>
+          </div>
+          <div class="pad tab-pad" id="homeList"></div>
+        </section>
+
+        <!-- C-06 HOME loading -->
+        <section class="screen" data-screen="home-loading" data-tab="home">
+          <header class="home-head glass glass-spec">
+            <div class="top"><div class="loc"><div class="city">Алматы</div><div class="sub">Определяем боксы рядом…</div></div></div>
+            <div class="skel" style="height:44px;border-radius:999px;margin-top:12px"></div>
+          </header>
+          <div class="pad tab-pad" id="homeSkel" style="padding-top:14px"></div>
+        </section>
+
+        <!-- C-06 HOME empty -->
+        <section class="screen" data-screen="home-empty" data-tab="home">
+          <header class="home-head glass glass-spec">
+            <div class="top"><div class="loc"><div class="city">Алматы ▾</div><div class="sub">Боксы рядом</div></div></div>
+          </header>
+          <div class="state" style="margin-top:80px"><div class="emoji"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg></div><div class="st-ttl">Рядом пока нет боксов</div><div class="st-txt">Включите уведомления — пришлём, как только заведение поблизости выставит бокс.</div><button class="btn btn-primary btn-m" style="margin-top:16px" data-toast="Уведомления включены" data-toast-type="success">Включить пуш</button></div>
+        </section>
+
+        <!-- C-06 HOME error -->
+        <section class="screen" data-screen="home-error" data-tab="home">
+          <header class="home-head glass glass-spec">
+            <div class="top"><div class="loc"><div class="city">Алматы ▾</div><div class="sub">Боксы рядом</div></div></div>
+          </header>
+          <div class="state" style="margin-top:80px"><div class="emoji"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div><div class="st-ttl">Не удалось загрузить</div><div class="st-txt">Проверьте соединение и попробуйте снова.</div><button class="btn btn-secondary btn-m" style="margin-top:16px" data-go="home-loading">Повторить</button></div>
+        </section>
+
+        <!-- C-06 MAP -->
+        <section class="screen" data-screen="map" data-tab="home">
+          <div class="map">
+            <div class="tiles"></div>
+            <div class="park" style="left:30px;top:120px;width:160px;height:120px"></div>
+            <div class="park" style="right:20px;top:340px;width:130px;height:160px"></div>
+            <div class="road" style="left:0;right:0;top:230px;height:14px"></div>
+            <div class="road" style="left:180px;top:0;bottom:0;width:14px"></div>
+            <div class="me" style="left:188px;top:430px"></div>
+            <span class="marker glass glass-spec" style="left:60px;top:160px" data-go="box"><span class="ico">3</span>от 990 ₸</span>
+            <span class="marker glass glass-spec" style="right:40px;top:280px" data-go="box"><span class="ico">1</span>1 500 ₸</span>
+            <span class="marker cluster glass glass-spec" style="left:230px;top:520px">12</span>
+            <span class="marker glass glass-spec" style="left:40px;top:560px" data-go="box"><span class="ico">2</span>790 ₸</span>
+          </div>
+          <header class="home-head" style="position:absolute;left:0;right:0;top:0">
+            <div class="hh-row">
+              <div class="hh-title">
+                <div class="city">Алматы <span class="city-arrow">▾</span></div>
+                <div class="sub">12 боксов на карте</div>
+              </div>
+              <div class="hh-actions">
+                <button class="iconbtn-round" data-go="home" aria-label="Список">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <button class="iconbtn-round" data-open="filtersOverlay" aria-label="Фильтры">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg>
+                </button>
+              </div>
+            </div>
+          </header>
+          <button class="iconbtn glass glass-spec" style="position:absolute;right:16px;bottom:200px;border:none;width:48px;height:48px;border-radius:50%">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          </button>
+          <div class="glass glass-spec" style="position:absolute;left:12px;right:12px;bottom:90px;border-radius:var(--r-card);padding:10px;display:flex;gap:12px;align-items:center" data-go="box">
+            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=70" style="width:64px;height:64px;border-radius:12px;object-fit:cover" alt="">
+            <div style="flex:1"><div style="font-weight:600;font-size:15px">Пекарский сюрприз</div><div class="t-caption muted">Пекарня «Тары-нан» · ★ 4,8</div><div style="margin-top:4px;display:flex;align-items:baseline;gap:6px"><span style="font-weight:700">990 ₸</span><span class="t-caption" style="text-decoration:line-through;color:var(--text-faint)">3 300 ₸</span><span class="discount" style="font-size:11px;padding:2px 6px">−70%</span></div></div>
+          </div>
+        </section>
+
+        <!-- C-08 BOX DETAIL -->
+        <section class="screen" data-screen="box" data-statusbar="light">
+          <div class="box-photo">
+            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=78" alt="">
+            <div class="grad"></div>
+          </div>
+          <div class="navbar floating">
+            <button class="back-chip" data-back><span class="ar">‹</span>Назад</button>
+            <div style="flex:1"></div>
+            <button class="nb-btn solid" style="font-size:22px;line-height:1">♡</button>
+          </div>
+          <div class="box-sheet">
+            <div class="h-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:44px;height:44px;border-radius:12px;background:var(--brand-primary);color:var(--text-inverse);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700">ТН</div>
+                <div><div style="font-weight:600">Пекарня «Тары-нан»</div><div class="t-caption muted">★ 4,8 · 214 оценок</div></div>
+              </div>
+              <span class="discount discount-lg">−70%</span>
+            </div>
+            <h1 class="t-h1" style="margin:18px 0 4px">Пекарский сюрприз</h1>
+            <p class="t-body muted" style="margin:0">Ассорти свежей выпечки дня: хлеб, булочки, слойки. Точный состав — сюрприз.</p>
+
+            <div class="benefit" style="margin-top:18px">
+              <div><div class="t-caption muted">Цена бокса</div><div style="display:flex;align-items:baseline;gap:8px"><span class="big">990 ₸</span><span class="old">3 300 ₸</span></div></div>
+              <div style="margin-left:auto;text-align:right"><div class="t-caption muted">Ценность</div><div style="font-weight:600">до 3 300 ₸</div></div>
+            </div>
+
+            <div style="margin-top:8px">
+              <div class="infoline"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="tx"><div class="a">Окно самовывоза сегодня</div><div class="b">20:00–21:30 · осталось 3 бокса</div></div></div>
+              <div class="infoline"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="tx"><div class="a">мкр. Самал-2, д. 58</div><div class="b">1,2 км от вас</div></div><button class="btn btn-secondary btn-s">2GIS</button></div>
+              <div class="infoline" style="border-bottom:none"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="tx"><div class="a">Категория: пекарня</div><div class="b">Самовывоз, есть вегетарианские позиции</div></div></div>
+            </div>
+
+            <div class="trust" style="margin-top:8px">
+              <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div class="tx"><b>Гарантия свежести.</b> Всё в пределах срока на момент выдачи. Проблема с боксом — вернём деньги после проверки.</div>
+            </div>
+          </div>
+          <div class="cta-bar glass glass-spec">
+            <div class="price"><span class="p">990 ₸</span><span class="o">3 300 ₸</span></div>
+            <button class="btn btn-primary" style="flex:1" data-go="booking">Забронировать</button>
+          </div>
+        </section>
+
+        <!-- C-08 BOX SOLD OUT -->
+        <section class="screen" data-screen="box-soldout" data-statusbar="light">
+          <div class="box-photo">
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=78" style="filter:grayscale(.7);opacity:.8" alt="">
+            <div class="grad"></div>
+          </div>
+          <div class="navbar floating"><button class="back-chip" data-back><span class="ar">‹</span>Назад</button></div>
+          <div class="box-sheet">
+            <div class="h-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:44px;height:44px;border-radius:12px;background:var(--brand-primary);color:var(--text-inverse);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700">ГМ</div>
+                <div><div style="font-weight:600">«Грин Маркет»</div><div class="t-caption muted">★ 4,6 · 88 оценок</div></div>
+              </div>
+              <span class="badge badge-muted"><span class="d"></span>Распродан</span>
+            </div>
+            <h1 class="t-h1" style="margin:18px 0 4px">Овощной бокс</h1>
+            <p class="t-body muted">Этот бокс уже разобрали. Включите напоминание — сообщим, когда заведение выставит новый.</p>
+            <div class="trust" style="margin-top:18px;background:var(--surface-2)"><div class="ic" style="background:var(--brand-primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div class="tx">Подписка на боксы «Грин Маркет»</div></div>
+          </div>
+          <div class="cta-bar glass glass-spec">
+            <button class="btn btn-secondary" style="flex:1" data-back>Назад</button>
+            <button class="btn btn-dark" style="flex:1" data-toast="Напомним о новом боксе" data-toast-type="success">Напомнить</button>
+          </div>
+        </section>
+
+        <!-- C-09 BOOKING -->
+        <section class="screen" data-screen="booking">
+          <header class="navbar glass glass-spec"><button class="back-chip" data-back><span class="ar">‹</span>Назад</button><div class="nb-title">Бронирование</div><div class="nb-right"></div></header>
+          <div class="pad" style="padding-bottom:150px">
+            <div class="boxcard" style="margin-top:14px">
+              <div style="display:flex;gap:12px;padding:12px">
+                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=70" style="width:72px;height:72px;border-radius:12px;object-fit:cover" alt="">
+                <div style="flex:1"><div style="font-weight:600">Пекарский сюрприз</div><div class="t-caption muted">Пекарня «Тары-нан»</div><div class="t-caption muted" style="margin-top:2px">🕒 20:00–21:30</div></div>
+              </div>
+            </div>
+
+            <div class="h-row" style="margin-top:22px">
+              <div><div style="font-weight:600">Количество</div><div class="t-caption muted">Осталось 3 бокса</div></div>
+              <div class="stepper" id="qtyStepper"><button data-qty="-1">−</button><span class="val" id="qtyVal">1</span><button data-qty="1">+</button></div>
+            </div>
+
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:16px;margin-top:20px">
+              <div class="sumrow"><span>Бокс <span id="sumQty">1</span> × 990 ₸</span><span class="v" id="sumBase">990 ₸</span></div>
+              <div class="sumrow"><span class="fee">Сервисный сбор 3% <span class="t-caption">(прозрачно)</span></span><span id="sumFee">30 ₸</span></div>
+              <div class="sumrow total"><span style="font-weight:600">Итого к оплате</span><span class="v" id="sumTotal">1 020 ₸</span></div>
+            </div>
+
+            <div class="rules" style="margin-top:18px">
+              <div class="r"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Заберите в окне <b style="color:var(--text)">20:00–21:30</b> в точке заведения.</div>
+              <div class="r"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>Отмена брони невозможна — оплата сразу при бронировании.</div>
+              <div class="r"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Не заберёте в окне — деньги остаются заведению, возврата нет.</div>
+            </div>
+          </div>
+          <div class="cta-bar glass glass-spec">
+            <div class="price"><span class="t-caption muted">Итого</span><span class="p" id="ctaTotal">1 020 ₸</span></div>
+            <button class="btn btn-dark" style="flex:1" data-go="payment">Перейти к оплате</button>
+          </div>
+        </section>
+
+        <!-- C-10 PAYMENT -->
+        <section class="screen" data-screen="payment">
+          <header class="navbar glass glass-spec"><button class="back-chip" data-back><span class="ar">‹</span>Назад</button><div class="nb-title">Оплата</div><div class="nb-right"></div></header>
+          <div class="pad" style="padding-bottom:150px">
+            <div class="section-ttl">Способ оплаты</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <label class="paymethod sel"><div class="logo" style="background:#FF3B30">Kaspi</div><div><div style="font-weight:600">Kaspi.kz</div><div class="t-caption muted">Оплата в один тап</div></div><span class="radio"></span></label>
+              <label class="paymethod"><div class="logo" style="background:var(--brand-primary)">CARD</div><div><div style="font-weight:600">Банковская карта</div><div class="t-caption muted">Visa · Mastercard</div></div><span class="radio"></span></label>
+              <label class="paymethod"><div class="logo" style="background:#000"></div><div><div style="font-weight:600">Apple Pay</div><div class="t-caption muted">Быстрая оплата</div></div><span class="radio"></span></label>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:16px;margin-top:22px">
+              <div class="sumrow"><span>Бокс 1 × 990 ₸</span><span>990 ₸</span></div>
+              <div class="sumrow"><span class="fee">Сервисный сбор 3%</span><span>30 ₸</span></div>
+              <div class="sumrow total"><span style="font-weight:600">Итого</span><span class="v">1 020 ₸</span></div>
+            </div>
+            <p class="t-caption muted" style="margin-top:14px">Платёж проводит Freedom Pay. Доля заведения и сервисный сбор разделяются автоматически.</p>
+          </div>
+          <div class="cta-bar glass glass-spec">
+            <button class="btn btn-primary btn-full" id="payBtn" data-pay>Оплатить 1 020 ₸</button>
+          </div>
+        </section>
+
+        <!-- C-11 SUCCESS -->
+        <section class="screen" data-screen="success">
+          <div class="success">
+            <div class="check"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <h1 class="t-h1" style="margin:8px 0 4px">Бронь подтверждена</h1>
+            <p class="t-body muted" style="margin:0 0 24px;max-width:280px">Пекарня «Тары-нан» ждёт вас сегодня в окне 20:00–21:30. Покажите код на кассе.</p>
+            <div class="codecard" style="width:100%"><div class="t-caption muted" style="margin-bottom:6px">КОД ВЫДАЧИ</div><div class="code">4827</div></div>
+            <button class="btn btn-primary btn-full" style="margin-top:24px" data-go="order">Показать код и QR</button>
+            <button class="btn btn-ghost btn-full" style="margin-top:4px" data-go="home">На главную</button>
+          </div>
+        </section>
+
+        <!-- C-12 ACTIVE ORDER -->
+        <section class="screen" data-screen="order">
+          <header class="navbar navbar-flat"><button class="back-chip" data-go="orders"><span class="ar">‹</span>Назад</button><div class="nb-title">Активный заказ</div><div class="nb-right"></div></header>
+          <div class="pad" style="padding-bottom:40px">
+            <div class="h-row" style="margin-top:14px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:11px;background:var(--brand-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:13px">ТН</div><div><div style="font-weight:600">Пекарня «Тары-нан»</div><div class="t-caption muted">Пекарский сюрприз × 1</div></div></div>
+              <span class="badge badge-info" id="orderBadge"><span class="d"></span>Ждёт выдачи</span>
+            </div>
+            <div class="codecard" style="margin-top:18px">
+              <div class="t-caption muted" style="margin-bottom:6px">КОД ВЫДАЧИ</div>
+              <div class="code">4827</div>
+              <div class="qr" style="margin-top:18px"></div>
+              <button class="btn btn-secondary btn-m" style="margin-top:18px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> Показать ярче</button>
+            </div>
+            <div class="listcard" style="margin-top:16px">
+              <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div style="flex:1"><div style="font-weight:600;font-size:14px">Окно выдачи</div><div class="t-caption muted">Сегодня 20:00–21:30</div></div></div>
+              <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div style="flex:1"><div style="font-weight:600;font-size:14px">мкр. Самал-2, д. 58</div><div class="t-caption muted">1,2 км от вас</div></div><button class="btn btn-secondary btn-s">2GIS</button></div>
+            </div>
+            <p class="t-caption muted" style="text-align:center;margin-top:16px">Напомним за 30 минут до конца окна.</p>
+            <button class="btn btn-dark btn-full" style="margin-top:8px" data-pickup>Демо: персонал подтвердил выдачу</button>
+            <div id="ratePrompt" style="display:none;margin-top:8px"><button class="btn btn-primary btn-full" data-go="rating">Оценить заказ</button></div>
+          </div>
+        </section>
+
+        <!-- C-13 ORDERS -->
+        <section class="screen" data-screen="orders" data-tab="orders">
+          <div class="pad safe-top">
+            <h1 class="t-h1" style="margin:6px 0 16px">Мои заказы</h1>
+            <div class="tabs" id="ordersTabs"><button class="active" data-otab="active">Активные</button><button data-otab="history">История</button></div>
+          </div>
+          <div class="pad tab-pad" id="ordersActive" style="padding-top:14px">
+            <div class="boxcard" data-go="order" style="cursor:pointer">
+              <div style="display:flex;gap:12px;padding:14px;align-items:center">
+                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=200&q=70" style="width:64px;height:64px;border-radius:12px;object-fit:cover" alt="">
+                <div style="flex:1"><div style="font-weight:600">Пекарский сюрприз</div><div class="t-caption muted">Пекарня «Тары-нан» · код 4827</div><div class="t-caption" style="margin-top:4px;color:var(--text-muted)">🕒 Сегодня 20:00–21:30</div></div>
+              </div>
+              <hr class="divider">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px"><span class="badge badge-info"><span class="d"></span>Ждёт выдачи</span><span style="font-weight:700">Показать код ›</span></div>
+            </div>
+          </div>
+          <div class="pad tab-pad" id="ordersHistory" style="padding-top:14px;display:none">
+            <div class="listcard">
+              <div class="orderrow" data-go="order-details" style="cursor:pointer"><div class="time">вчера</div><div class="info"><div class="nm">Кофейня «Дала»</div><div class="sub">1 бокс · 1 190 ₸</div></div><span class="badge badge-success"><span class="d"></span>Выдан</span></div>
+              <hr class="divider">
+              <div class="orderrow" data-go="order-details" style="cursor:pointer"><div class="time">5 июн</div><div class="info"><div class="nm">«Грин Маркет»</div><div class="sub">1 бокс · 1 200 ₸</div></div><span class="badge badge-muted"><span class="d"></span>Просрочен</span></div>
+              <hr class="divider">
+              <div class="orderrow" data-go="order-details" style="cursor:pointer"><div class="time">2 июн</div><div class="info"><div class="nm">Ресторан «Алма»</div><div class="sub">2 бокса · 2 060 ₸</div></div><span class="badge badge-warning"><span class="d"></span>Возврат</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- C-13 ORDERS empty -->
+        <section class="screen" data-screen="orders-empty" data-tab="orders">
+          <div class="pad safe-top"><h1 class="t-h1" style="margin:6px 0 16px">Мои заказы</h1></div>
+          <div class="state" style="margin-top:60px"><div class="emoji"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="st-ttl">Заказов пока нет</div><div class="st-txt">Найдите бокс на главной и заберите вкусно со скидкой до 70%.</div><button class="btn btn-primary btn-m" style="margin-top:16px" data-go="home">К боксам</button></div>
+        </section>
+
+        <!-- C-14 ORDER DETAILS -->
+        <section class="screen" data-screen="order-details">
+          <header class="navbar navbar-flat"><button class="back-chip" data-back><span class="ar">‹</span>Назад</button><div class="nb-title">Детали заказа</div><div class="nb-right"></div></header>
+          <div class="pad" style="padding-bottom:40px">
+            <div class="h-row" style="margin-top:14px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:11px;background:var(--brand-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:13px">Д</div><div><div style="font-weight:600">Кофейня «Дала»</div><div class="t-caption muted">Вчера · 19:30</div></div></div>
+              <span class="badge badge-success"><span class="d"></span>Выдан</span>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:16px;margin-top:18px">
+              <div class="sumrow"><span>Кофе + выпечка × 1</span><span>1 160 ₸</span></div>
+              <div class="sumrow"><span class="fee">Сервисный сбор 3%</span><span>30 ₸</span></div>
+              <div class="sumrow total"><span style="font-weight:600">Оплачено · Kaspi</span><span class="v">1 190 ₸</span></div>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:18px" data-go="rating">Оценить заказ</button>
+            <button class="btn btn-secondary btn-full" style="margin-top:8px" data-go="complaint">Пожаловаться на бокс</button>
+          </div>
+        </section>
+
+        <!-- C-15 RATING -->
+        <section class="screen" data-screen="rating">
+          <header class="navbar navbar-flat"><button class="back-chip" data-back><span class="ar">‹</span>Назад</button><div class="nb-title">Оценка</div><div class="nb-right"></div></header>
+          <div class="pad" style="padding-bottom:40px;text-align:center">
+            <div style="width:64px;height:64px;border-radius:18px;background:var(--brand-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:22px;margin:24px auto 14px">Д</div>
+            <h1 class="t-h1" style="margin:0 0 4px">Как вам бокс?</h1>
+            <p class="t-body muted" style="margin:0 0 18px">Кофейня «Дала» · кофе + выпечка</p>
+            <div class="stars input-stars" id="rateStars" style="font-size:40px;justify-content:center"><span data-star="1">★</span><span data-star="2">★</span><span data-star="3">★</span><span data-star="4">★</span><span data-star="5">★</span></div>
+            <textarea class="input" style="margin-top:22px;text-align:left" placeholder="Расскажите подробнее (необязательно)"></textarea>
+            <div id="ratingLow" style="display:none;margin-top:14px"><div class="trust" style="background:var(--warning-bg)"><div class="ic" style="background:var(--warning)">!</div><div class="tx">Что-то не так с боксом? Можно оставить жалобу с фото — поддержка рассмотрит возврат.</div></div><button class="btn btn-secondary btn-full" style="margin-top:10px" data-go="complaint">Пожаловаться</button></div>
+            <button class="btn btn-primary btn-full" style="margin-top:18px" data-toast="Спасибо за оценку!" data-toast-type="success" data-go="orders">Отправить</button>
+          </div>
+        </section>
+
+        <!-- C-16 COMPLAINT -->
+        <section class="screen" data-screen="complaint">
+          <header class="navbar navbar-flat"><button class="back-chip" data-back><span class="ar">‹</span>Назад</button><div class="nb-title">Жалоба</div><div class="nb-right"></div></header>
+          <div class="pad" style="padding-bottom:40px">
+            <div class="section-ttl">Причина</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip">Просрочка</button><button class="chip">Качество</button><button class="chip">Несоответствие</button><button class="chip">Другое</button></div>
+            <div class="section-ttl">Фото — обязательно</div>
+            <div class="uploader" id="uploader">
+              <button class="slot" data-addphoto><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить</button>
+            </div>
+            <p class="t-caption" id="photoErr" style="color:var(--danger);display:none;margin-top:8px">Без фото жалоба не принимается — это доказательство.</p>
+            <div class="section-ttl">Описание</div>
+            <textarea class="input" placeholder="Что именно было не так?"></textarea>
+            <div class="rules" style="margin-top:16px"><div class="r"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Возврат рассматривает поддержка после проверки фото. Решение придёт уведомлением.</div></div>
+            <button class="btn btn-danger btn-full" style="margin-top:18px" id="submitComplaint">Отправить жалобу</button>
+          </div>
+        </section>
+
+        <!-- FAVORITES (Избранное) -->
+        <section class="screen" data-screen="favorites" data-tab="favorites">
+          <div class="pad safe-top">
+            <h1 class="t-h1" style="margin:6px 0 16px">Избранное</h1>
+          </div>
+          <div class="pad tab-pad" id="favList" style="padding-top:0"></div>
+          <div class="pad tab-pad" id="favEmpty" style="display:none">
+            <div class="state" style="margin-top:60px"><div class="emoji"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="st-ttl">Здесь будут любимые заведения</div><div class="st-txt">Нажимайте ♡ на карточке бокса — и оно появится тут. Пришлём пуш, когда выставят новый бокс.</div><button class="btn btn-primary btn-m" style="margin-top:16px" data-go="home">К боксам</button></div>
+          </div>
+        </section>
+
+        <!-- C-17 PROFILE -->
+        <section class="screen" data-screen="profile" data-tab="profile">
+          <div class="pad safe-top">
+            <h1 class="t-h1" style="margin:6px 0 14px">Профиль</h1>
+            <div class="prof-head" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card)">
+              <div class="ava">А</div>
+              <div style="flex:1"><div style="font-weight:600;font-size:17px">Аружан</div><div class="t-caption muted">+7 700 123 45 67</div></div>
+            </div>
+          </div>
+          <div class="pad tab-pad">
+            <div class="section-ttl">Язык интерфейса</div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:600">Язык</span>
+              <div class="langseg" id="langSeg"><button class="active" data-lang="ru">Русский</button><button data-lang="kk">Қазақша</button></div>
+            </div>
+            <div class="section-ttl">Настройки</div>
+            <div class="listcard">
+              <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><span style="flex:1;font-weight:600">Уведомления</span><span class="arr">›</span></div>
+              <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96c1.4 9.3-2 14.4-7.2 16.7C8.7 21 5 21 5 21"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div><span style="flex:1;font-weight:600">Спасено еды</span><span class="t-caption muted" style="margin-right:6px">скоро</span></div>
+              <div class="li"><div class="lic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span style="flex:1;font-weight:600">Оферта и политика</span><span class="arr">›</span></div>
+            </div>
+            <button class="btn btn-secondary btn-full" style="margin-top:18px;color:var(--danger);border-color:var(--border)" data-go="phone">Выйти</button>
+          </div>
+        </section>
+
+      </div><!-- /screens -->
+
+      <!-- TAB BAR -->
+      <nav class="tabbar glass glass-spec" id="tabbar">
+        <button class="tab" data-go="home">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+          Главная
+        </button>
+        <button class="tab" data-go="orders">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2l1.5 3h9L18 2"/><path d="M4 7h16l-1.2 13H5.2L4 7z"/></svg>
+          Заказы
+        </button>
+        <button class="tab" data-go="favorites">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Избранное
+        </button>
+        <button class="tab" data-go="profile">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          Профиль
+        </button>
+      </nav>
+
+      <!-- FILTERS SHEET -->
+      <div class="overlay" id="filtersOverlay">
+        <div class="sheet glass-strong glass">
+          <div class="grab"></div>
+          <div class="h-row"><div class="t-h2">Фильтры</div><button class="nb-btn" data-close="filtersOverlay" style="margin-right:-8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+          <div class="section-ttl">Тип заведения</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip active">Все</button><button class="chip">Пекарни</button><button class="chip">Кофейни</button><button class="chip">Продукты</button><button class="chip">Рестораны</button></div>
+          <div class="section-ttl">Окно выдачи</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip">Сейчас</button><button class="chip active">До 21:00</button><button class="chip">Вечер</button></div>
+          <div class="section-ttl">Цена до</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip">1 000 ₸</button><button class="chip active">2 000 ₸</button><button class="chip">Любая</button></div>
+          <div style="display:flex;gap:10px;margin-top:22px">
+            <button class="btn btn-secondary" style="flex:1" data-close="filtersOverlay">Сбросить</button>
+            <button class="btn btn-primary" style="flex:2" data-close="filtersOverlay">Показать 12 боксов</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOAST HOST -->
+      <div id="toastHost" style="position:absolute;left:0;right:0;bottom:96px;z-index:80;display:flex;justify-content:center;pointer-events:none"></div>
+
+      <div class="home-ind"></div>
+    </div><!-- /viewport -->
+  </div><!-- /device -->
+</div><!-- /stage -->
+
+<div id="tweaks-root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script src="prototype.js"></script>
+<script type="text/babel" src="tweaks-app.jsx"></script>
+</body>
+</html>

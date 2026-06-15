@@ -1,0 +1,46 @@
+{
+  "appName": "SaqtaGo",
+  "tabs": {
+    "home": "Главная",
+    "orders": "Заказы",
+    "favorites": "Избранное",
+    "profile": "Профиль"
+  },
+  "actions": {
+    "next": "Далее",
+    "back": "Назад",
+    "done": "Готово",
+    "cancel": "Отмена",
+    "apply": "Применить",
+    "reset": "Сбросить",
+    "retry": "Повторить",
+    "save": "Сохранить",
+    "continue": "Продолжить",
+    "skip": "Пропустить",
+    "allow": "Разрешить",
+    "later": "Позже",
+    "send": "Отправить",
+    "close": "Закрыть",
+    "open2gis": "Открыть в 2GIS"
+  },
+  "status": {
+    "order": {
+      "created": "Создан",
+      "paid": "Ждёт выдачи",
+      "picked_up": "Выдан",
+      "expired": "Просрочен",
+      "refunded": "Возврат",
+      "payment_failed": "Оплата не прошла"
+    },
+    "box": {
+      "published": "В продаже",
+      "sold_out": "Распродан",
+      "closed": "Закрыт"
+    }
+  },
+  "units": {
+    "left": "осталось {{count}}",
+    "distanceM": "{{value}} м",
+    "distanceKm": "{{value}} км"
+  }
+}
