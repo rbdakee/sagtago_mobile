@@ -102,11 +102,22 @@ jobs:
       - name: Tour screens via deep links
         run: |
           U="${{ steps.sim.outputs.udid }}"
-          shoot() { sleep "$1"; xcrun simctl io "$U" screenshot "artifacts/$2"; echo "shot $2"; }
-          xcrun simctl openurl "$U" "saqtago://box/b1";     shoot 6 02-box-reserve.png
-          xcrun simctl openurl "$U" "saqtago://booking/b1"; shoot 6 03-booking.png
-          xcrun simctl openurl "$U" "saqtago://order/o1";   shoot 6 04-order.png
-          xcrun simctl openurl "$U" "saqtago://filters";    shoot 5 05-filters.png
+          # Холодный заход на каждый экран: сначала убиваем приложение, затем openurl
+          # cold-launch'ит его сразу на нужный роут. Так iOS НЕ показывает диалог
+          # "Open in SaqtaGo?", который при openurl в уже открытое приложение
+          # блокирует навигацию.
+          nav() {
+            xcrun simctl terminate "$U" "$BUNDLE_ID" 2>/dev/null || true
+            sleep 1
+            xcrun simctl openurl "$U" "$1"
+            sleep "$2"
+            xcrun simctl io "$U" screenshot "artifacts/$3"
+            echo "shot $3 ($1)"
+          }
+          nav "saqtago://box/b1"     14 02-box-reserve.png
+          nav "saqtago://booking/b1" 14 03-booking.png
+          nav "saqtago://order/o1"   14 04-order.png
+          nav "saqtago://filters"    12 05-filters.png
           # остановить запись видео
           if [ -f rec.pid ]; then kill -INT "$(cat rec.pid)" 2>/dev/null || true; sleep 3; fi
 
